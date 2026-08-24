@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>確定申告 — ピリカルキナ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Shippori+Mincho:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+
+  :root {
+    --paper: #faf8f4;
+    --card: #ffffff;
+    --ink: #4a3c2a;
+    --ink-2: #8a7a63;
+    --ink-3: #b3a68f;
+    --hairline: #e8e2d6;
+    --cyan-light: #dbf3f3;
+    --cyan: #678e8d;
+    --gold: #a58b5e;
+    --track: #f4f1ea;
+    --good: #16a34a;
+    --good-text: #006300;
+    --bad: #c14f4a;
+    --bad-text: #b02a2a;
+  }
+
+  body {
+    font-family: "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.75;
+    padding-bottom: 60px;
+  }
+  .serif { font-family: "Shippori Mincho", "Hiragino Mincho ProN", serif; }
+
+  /* ══ ヘッダー ══ */
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--hairline);
+    padding: 12px 22px 10px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  header .en-label {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 10px; letter-spacing: .34em; color: var(--gold); text-transform: uppercase;
+    line-height: 1.4;
+  }
+  header h1 { font-family: "Shippori Mincho", serif; font-size: 18px; font-weight: 600; letter-spacing: .04em; line-height: 1.3; }
+  .year-badge {
+    margin-left: auto; display: flex; align-items: center; gap: 9px;
+    font-size: 12px; color: var(--ink-2);
+  }
+  .year-badge b { font-size: 15px; color: var(--ink); }
+  .icon-btn {
+    border: 1px solid var(--hairline); background: #fff; border-radius: 50%;
+    width: 34px; height: 34px; font-size: 16px; cursor: pointer; line-height: 1;
+    display: grid; place-items: center; color: var(--ink-2);
+  }
+  .icon-btn:hover { background: var(--track); }
+
+  /* ══ タブ ══ */
+  nav.tabs {
+    background: var(--card); border-bottom: 1px solid var(--hairline);
+    display: flex; padding: 0 12px; position: sticky; top: 0; z-index: 49;
+  }
+  .tab-btn {
+    flex: 1; border: 0; background: none; font: inherit; color: var(--ink-2);
+    padding: 12px 6px; cursor: pointer; white-space: nowrap; font-size: 14px;
+    border-bottom: 2.5px solid transparent;
+  }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); font-weight: 700; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 20px 16px 0; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ══ カード ══ */
+  .card {
+    background: var(--card); border: 1px solid var(--hairline);
+    border-radius: 6px; padding: 18px 20px; margin-bottom: 16px;
+  }
+  .card > h2 {
+    font-family: "Shippori Mincho", serif; font-size: 16px; font-weight: 600;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .card > h2 .sub { font-family: "Hiragino Sans", sans-serif; font-size: 12px; color: var(--ink-3); font-weight: 400; }
+  .card > h2 .spacer { margin-left: auto; }
+  .card.flat { padding: 0; border: 0; background: none; }
+
+  .grid { display: grid; gap: 14px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+
+  /* ══ 数字カード ══ */
+  .kpi {
+    background: var(--card); border: 1px solid var(--hairline); border-radius: 6px;
+    padding: 15px 18px;
+  }
+  .kpi .label { font-size: 12px; color: var(--ink-2); }
+  .kpi .value { font-family: "Cormorant Garamond", Georgia, serif; font-size: 32px; font-weight: 600; line-height: 1.2; }
+  .kpi .note { font-size: 11.5px; color: var(--ink-3); }
+  .kpi.hero { background: var(--cyan-light); border-color: #c3e5e5; }
+  .kpi.hero .value { font-size: 36px; }
+
+  /* ══ フォーム ══ */
+  label { display: block; font-size: 12.5px; color: var(--ink); margin-bottom: 4px; font-weight: 600; }
+  label .hint { font-weight: 400; color: var(--ink-3); font-size: 11.5px; margin-left: 5px; }
+  input, select, textarea {
+    width: 100%; padding: 11px 12px; font: inherit; font-size: 15px;
+    border: 1px solid #ded7c8; border-radius: 5px; background: #fff; color: var(--ink);
+  }
+  select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%), linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
+    background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+  input:focus, select:focus, textarea:focus { outline: 3px solid var(--cyan-light); border-color: var(--cyan); }
+  input[type=number] { text-align: right; font-family: "Cormorant Garamond", Georgia, serif; font-size: 22px; font-weight: 600; }
+  .field { margin-bottom: 14px; }
+
+  .btn {
+    border: 1px solid #ded7c8; background: #fff; color: var(--ink);
+    padding: 10px 17px; border-radius: 5px; font: inherit; font-size: 14px; cursor: pointer; white-space: nowrap;
+  }
+  .btn:hover { background: var(--track); }
+  .btn-primary { background: var(--cyan); border-color: var(--cyan); color: #fff; font-weight: 600; }
+  .btn-primary:hover { background: #56807f; }
+  .btn-danger { color: var(--bad-text); border-color: #e6cfcd; }
+  .btn-sm { padding: 5px 11px; font-size: 12.5px; }
+  .btn-big { width: 100%; padding: 15px; font-size: 16px; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* 支出／収入の切り替え */
+  .segmented { display: flex; background: var(--track); border-radius: 7px; padding: 4px; margin-bottom: 18px; }
+  .segmented button {
+    flex: 1; border: 0; background: none; font: inherit; font-size: 15px; font-weight: 600;
+    padding: 10px; border-radius: 5px; cursor: pointer; color: var(--ink-2);
+  }
+  .segmented button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(74,60,42,.14); }
+  .segmented button.on[data-k="exp"] { color: var(--bad-text); }
+  .segmented button.on[data-k="rev"] { color: var(--good-text); }
+
+  /* 折りたたみ */
+  details { border-top: 1px solid var(--hairline); margin-top: 4px; }
+  details > summary {
+    cursor: pointer; padding: 11px 2px; font-size: 13.5px; color: var(--cyan);
+    list-style: none; display: flex; align-items: center; gap: 6px; font-weight: 600;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before { content: '▸'; transition: transform .15s; display: inline-block; }
+  details[open] > summary::before { transform: rotate(90deg); }
+  details > .details-body { padding: 4px 0 12px; }
+  .card > details:first-of-type { border-top: 0; }
+
+  /* ══ テーブル ══ */
+  .tbl-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: top; }
+  th { font-size: 11px; color: var(--ink-2); font-weight: 600; background: #fcfaf6; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-family: "Cormorant Garamond", Georgia, serif; font-size: 15px; white-space: nowrap; }
+  tr.total td { font-weight: 700; background: #fcfaf6; border-top: 2px solid var(--gold); }
+  tr.sub td { background: #fcfaf6; font-weight: 600; }
+  .empty { text-align: center; color: var(--ink-3); padding: 28px 12px; font-size: 13px; }
+
+  .amt-pos { color: var(--good-text); }
+  .amt-neg { color: var(--bad-text); }
+  .muted { color: var(--ink-3); }
+  .warn { background: #fdf6e6; border: 1px solid #e8d9b0; color: #6b5320; padding: 11px 14px; border-radius: 5px; font-size: 13px; margin-bottom: 12px; }
+  .info { background: var(--cyan-light); border: 1px solid #c3e5e5; padding: 11px 14px; border-radius: 5px; font-size: 13px; margin-bottom: 12px; }
+  .pill { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 9px; border: 1px solid; line-height: 1.7; }
+
+  /* やること */
+  .todo { display: flex; gap: 11px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--hairline); }
+  .todo:last-child { border-bottom: 0; }
+  .todo .ico { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 13px; background: var(--track); }
+  .todo .txt { flex: 1; font-size: 13.5px; }
+
+  /* ステップ */
+  .step { display: flex; gap: 13px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--hairline); }
+  .step:last-child { border-bottom: 0; }
+  .step .no {
+    width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    font-size: 13px; font-weight: 700; background: var(--track); color: var(--ink-2);
+  }
+  .step.done .no { background: var(--cyan); color: #fff; }
+  .step .body { flex: 1; min-width: 0; }
+  .step .body h3 { font-size: 14.5px; font-weight: 700; margin-bottom: 2px; }
+  .step .body p { font-size: 12.5px; color: var(--ink-2); margin-bottom: 8px; }
+
+  /* ══ モーダル ══ */
+  .modal { display: none; position: fixed; inset: 0; background: rgba(40,32,22,.45); z-index: 200; padding: 18px; overflow-y: auto; }
+  .modal.show { display: flex; align-items: flex-start; justify-content: center; }
+  .modal-box { background: var(--card); border-radius: 7px; padding: 22px; width: 100%; max-width: 520px; margin: auto; }
+  .modal-box h2 { font-family: "Shippori Mincho", serif; font-size: 17px; margin-bottom: 15px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(90px);
+    background: var(--ink); color: #fff; padding: 11px 22px; border-radius: 30px;
+    font-size: 14px; z-index: 300; opacity: 0; transition: .25s; pointer-events: none; max-width: 90vw; text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ══ レシート ══ */
+  .shot-btn {
+    display: block; width: 100%; padding: 26px 16px; font-size: 17px; font-weight: 700;
+    background: var(--cyan); color: #fff; border: 0; border-radius: 7px; cursor: pointer;
+    font-family: inherit; letter-spacing: .04em; line-height: 1.5;
+  }
+  .shot-btn small { display: block; font-size: 12px; font-weight: 400; opacity: .85; letter-spacing: 0; margin-top: 3px; }
+  .shot-btn:hover { background: #56807f; }
+  .receipt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 11px; }
+  .receipt-card { border: 1px solid var(--hairline); border-radius: 5px; overflow: hidden; background: #fff; cursor: pointer; }
+  .receipt-card:hover { border-color: var(--cyan); }
+  .receipt-card img { width: 100%; height: 92px; object-fit: cover; display: block; background: var(--track); }
+  .receipt-card .meta { padding: 7px 9px; font-size: 11.5px; line-height: 1.6; }
+  .preview-img { width: 100%; max-height: 250px; object-fit: contain; background: var(--track); border-radius: 5px; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--hairline); border-top-color: var(--cyan); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .jrow { display: grid; grid-template-columns: 1fr 120px 1fr 120px; gap: 10px; align-items: end; }
+
+  /* ══ 印刷 ══ */
+  @media print {
+    @page { size: A4; margin: 14mm 16mm; }
+    body { background: #fff; font-size: 11.5px; padding: 0; }
+    header, nav.tabs, .no-print, .btn, .toast, .icon-btn, details > summary { display: none !important; }
+    details > .details-body { display: block !important; }
+    .wrap { max-width: none; padding: 0; }
+    .card { border: 0; padding: 0; margin-bottom: 14px; break-inside: avoid; }
+    .card > h2 { border-bottom: 1px solid #999; padding-bottom: 4px; }
+    table { break-inside: auto; }
+    tr { break-inside: avoid; break-after: auto; }
+    thead { display: table-header-group; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  @media (max-width: 760px) {
+    body { font-size: 15px; }
+    .g3 { grid-template-columns: 1fr; }
+    .jrow { grid-template-columns: 1fr 1fr; }
+    header { padding: 10px 14px; }
+    .wrap { padding: 14px 11px 0; }
+    .card { padding: 15px 14px; }
+    .tab-btn { font-size: 13px; padding: 12px 2px; }
+  }
+  @media (max-width: 460px) {
+    .g2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="en-label">Blue Return</div>
+    <h1>確定申告</h1>
+  </div>
+  <div class="year-badge">
+    <span><b id="hdrYear">—</b> 年分</span>
+    <button class="icon-btn" onclick="switchTab('settings')" title="設定">⚙</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="home">ホーム</button>
+  <button class="tab-btn" data-tab="trade">取引を入れる</button>
+  <button class="tab-btn" data-tab="books">帳簿</button>
+  <button class="tab-btn" data-tab="close">決算・申告</button>
+  <button class="tab-btn" data-tab="settings">設定</button>
+</nav>
+
+<div class="wrap">
+
+<!-- ══ ホーム ══════════════════════════════════════════ -->
+<div class="panel active" id="panel-home">
+
+  <div class="grid g3" style="margin-bottom:16px">
+    <div class="kpi"><div class="label">売上（収入）</div><div class="value amt-pos" id="kpiRev">¥0</div><div class="note" id="kpiRevNote">—</div></div>
+    <div class="kpi"><div class="label">経費</div><div class="value amt-neg" id="kpiExp">¥0</div><div class="note" id="kpiExpNote">—</div></div>
+    <div class="kpi hero"><div class="label">もうけ（所得）</div><div class="value" id="kpiProfit">¥0</div><div class="note" id="kpiProfitNote">—</div></div>
+  </div>
+
+  <div class="card">
+    <h2>やること
+      <span class="spacer"></span>
+      <button class="btn btn-sm btn-primary" onclick="switchTab('trade')">取引を入れる</button>
+    </h2>
+    <div id="homeAlerts"></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h2>月ごとの収支 <span class="sub" id="chartYear"></span></h2>
+      <div id="monthChart"></div>
+    </div>
+    <div class="card">
+      <h2>経費の内訳</h2>
+      <div class="tbl-scroll" style="max-height:300px;overflow-y:auto"><table id="expBreak"></table></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>最近の記帳 <span class="sub">直近10件</span>
+      <span class="spacer"></span>
+      <button class="btn btn-sm" onclick="switchTab('books')">帳簿を見る</button>
+    </h2>
+    <div class="tbl-scroll"><table id="recentTbl"></table></div>
+  </div>
+</div>
+
+<!-- ══ 取引を入れる ══════════════════════════════════ -->
+<div class="panel" id="panel-trade">
+
+  <!-- ① レシート -->
+  <div class="card">
+    <div id="apiWarn"></div>
+    <button class="shot-btn" onclick="document.getElementById('shotInput').click()">
+      📷 レシートを撮る
+      <small>AIが日付・金額・お店・勘定科目を読み取ります</small>
+    </button>
+    <input type="file" id="shotInput" accept="image/*" capture="environment" multiple style="display:none" onchange="onShot(this.files)">
+    <div id="queueCard" style="display:none;margin-top:14px">
+      <div style="font-weight:700;font-size:13.5px;margin-bottom:4px">確認待ち <span id="queueCount" class="muted"></span></div>
+      <div id="queueList"></div>
+    </div>
+  </div>
+
+  <!-- ② かんたん入力 -->
+  <div class="card">
+    <h2>手で入れる</h2>
+
+    <div class="segmented">
+      <button data-k="exp" class="on" id="modeExpBtn" onclick="setMode('exp')">支出（お金を払った）</button>
+      <button data-k="rev" id="modeRevBtn" onclick="setMode('rev')">収入（お金が入った）</button>
+    </div>
+
+    <div id="simpleForm">
+      <div class="grid g2">
+        <div class="field"><label>日付</label><input type="date" id="inDate"></div>
+        <div class="field"><label>金額 <span class="hint">税込</span></label><input type="number" id="inAmount" placeholder="0" inputmode="numeric"></div>
+      </div>
+      <div class="grid g2">
+        <div class="field"><label id="inAccLabel">何に使った？</label><select id="inAccount"></select></div>
+        <div class="field"><label id="inPayLabel">どこから払った？</label><select id="inPay"></select></div>
+      </div>
+
+      <details id="moreDetails">
+        <summary>くわしく入れる（お店・メモ・按分）</summary>
+        <div class="details-body">
+          <div class="grid g2">
+            <div class="field"><label>お店・取引先 <span class="hint">次から科目を自動で選びます</span></label>
+              <input type="text" id="inPartner" list="partnerList" placeholder="例：ヨドバシカメラ"><datalist id="partnerList"></datalist></div>
+            <div class="field"><label>どの事業？</label><select id="inBiz"></select></div>
+          </div>
+          <div class="field"><label>メモ（摘要）</label><input type="text" id="inDesc" placeholder="例：レッスン用ケーブル"></div>
+          <div class="field" id="ratioField">
+            <label>事業で使う割合 <span class="hint">自宅兼事務所などの家事按分</span></label>
+            <div style="display:flex;gap:10px;align-items:center">
+              <input type="number" id="inRatio" min="0" max="100" step="1" value="100" style="max-width:110px">
+              <span class="muted" style="font-size:13px">％　<span id="ratioHint"></span></span>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- 上級者向け -->
+    <details>
+      <summary>仕訳を直接入力する（上級者向け）</summary>
+      <div class="details-body" id="jnlForm">
+        <div class="grid g3">
+          <div class="field"><label>日付</label><input type="date" id="jDate"></div>
+          <div class="field"><label>取引先</label><input type="text" id="jPartner"></div>
+          <div class="field"><label>事業</label><select id="jBiz"></select></div>
+        </div>
+        <div class="jrow" style="margin-bottom:12px">
+          <div><label>借方 科目</label><select id="jDebit"></select></div>
+          <div><label>借方 金額</label><input type="number" id="jDebitAmt" placeholder="0" inputmode="numeric"></div>
+          <div><label>貸方 科目</label><select id="jCredit"></select></div>
+          <div><label>貸方 金額</label><input type="number" id="jCreditAmt" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field"><label>摘要</label><input type="text" id="jDesc"></div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="saveJournalDirect()">仕訳を記帳する</button></div>
+      </div>
+    </details>
+
+    <div id="preview" class="muted" style="font-size:12.5px;margin:10px 0 14px;min-height:1.2em"></div>
+    <button class="btn btn-primary btn-big" onclick="saveSimple()">この内容で記帳する</button>
+  </div>
+
+  <!-- ③ 固定費 -->
+  <div class="card">
+    <h2>毎月かかるもの <span class="sub">家賃・サブスクなど。毎月自動で記帳します</span>
+      <span class="spacer"></span>
+      <button class="btn btn-sm btn-primary" onclick="openFixed()">＋ 追加</button>
+    </h2>
+    <div class="tbl-scroll"><table id="fixedTbl"></table></div>
+  </div>
+
+  <!-- ④ 今月の記帳 -->
+  <div class="card">
+    <h2>今月の記帳 <span class="sub" id="thisMonthLabel"></span></h2>
+    <div class="tbl-scroll"><table id="monthTbl"></table></div>
+  </div>
+
+  <!-- ⑤ 保存済みレシート -->
+  <div class="card">
+    <details>
+      <summary>保存したレシートを見る <span id="rcpCount" class="muted"></span></summary>
+      <div class="details-body">
+        <div class="field"><input type="search" id="rcpSearch" placeholder="日付・金額・お店で検索" oninput="renderReceipts()"></div>
+        <div id="receiptList"></div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ══ 帳簿 ══════════════════════════════════════════ -->
+<div class="panel" id="panel-books">
+  <div class="card no-print">
+    <div class="grid g3">
+      <div class="field"><label>見たい帳簿</label><select id="bookType" onchange="renderBooks()">
+        <option value="journal">仕訳帳（すべての取引）</option>
+        <option value="ledger">総勘定元帳（科目ごと）</option>
+        <option value="trial">合計残高試算表</option>
+      </select></div>
+      <div class="field" id="ledgerAccField"><label>勘定科目</label><select id="ledgerAcc" onchange="renderBooks()"></select></div>
+      <div class="field"><label>検索</label><input type="search" id="bookSearch" placeholder="メモ・取引先" oninput="renderBooks()"></div>
+    </div>
+    <div class="btn-row"><button class="btn" onclick="window.print()">印刷する</button><button class="btn" onclick="exportCsv()">CSVで書き出す</button></div>
+  </div>
+  <div class="card"><div id="bookBody"></div></div>
+</div>
+
+<!-- ══ 決算・申告 ══════════════════════════════════ -->
+<div class="panel" id="panel-close">
+  <div class="card no-print">
+    <h2>年に一度の決算 <span class="sub">上から順に進めれば決算書ができます</span></h2>
+    <div id="stepList"></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h2>損益計算書 <span class="sub" id="plYear"></span></h2>
+      <div class="tbl-scroll"><table id="plTbl"></table></div>
+    </div>
+    <div class="card">
+      <h2>貸借対照表 <span class="sub" id="bsYear"></span></h2>
+      <div class="tbl-scroll"><table id="bsTbl"></table></div>
+      <div id="bsCheck" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>税金の目安 <span class="sub">社会保険料などの控除は含みません</span>
+      <span class="spacer"></span>
+      <button class="btn btn-sm no-print" onclick="window.print()">決算書を印刷</button>
+    </h2>
+    <div class="tbl-scroll"><table id="taxTbl"></table></div>
+  </div>
+
+  <div class="card" id="assetCard">
+    <h2>減価償却の資産 <span class="sub">10万円以上のパソコン・楽器・車など</span>
+      <span class="spacer"></span>
+      <button class="btn btn-sm btn-primary no-print" onclick="openAsset()">＋ 追加</button>
+    </h2>
+    <div class="tbl-scroll"><table id="assetTbl"></table></div>
+  </div>
+</div>
+
+<!-- ══ 設定 ══════════════════════════════════════════ -->
+<div class="panel" id="panel-settings">
+  <div class="card">
+    <h2>基本の設定</h2>
+    <div class="grid g3">
+      <div class="field"><label>申告する年</label><select id="setYear" onchange="changeYear()"></select></div>
+      <div class="field"><label>屋号</label><input type="text" id="setName" placeholder="ピリカルキナ"></div>
+      <div class="field"><label>青色申告特別控除</label><select id="setDeduction">
+        <option value="650000">65万円（複式簿記＋e-Tax）</option>
+        <option value="550000">55万円（複式簿記・紙で提出）</option>
+        <option value="100000">10万円（簡易簿記）</option>
+      </select></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSettings()">保存</button>
+  </div>
+
+  <div class="card">
+    <h2>レシートのAI読み取り</h2>
+    <div class="info">APIキーはこの端末のブラウザにだけ保存されます。取得は console.anthropic.com から。<br>
+      料金の目安：Haiku 4.5 でレシート1枚あたり 0.1円未満です。</div>
+    <div class="grid g2">
+      <div class="field"><label>APIキー</label><input type="password" id="setApiKey" placeholder="sk-ant-api03-..."></div>
+      <div class="field"><label>使うモデル</label><select id="setModel">
+        <option value="claude-haiku-4-5">Haiku 4.5（安い・レシート向き）</option>
+        <option value="claude-sonnet-5">Sonnet 5（読み取り強化）</option>
+        <option value="claude-opus-5">Opus 5（最高精度・高い）</option>
+      </select></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="saveApi()">保存</button><button class="btn" onclick="testApi()">接続テスト</button></div>
+    <div id="apiTestResult" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <h2>携帯とPCでデータを共有</h2>
+    <div class="info">GitHubのプライベートリポジトリに帳簿とレシート画像を保存します。携帯で撮って、PCで集計できます。<br>
+      トークンは Fine-grained personal access token（Contents: Read and write）を使ってください。</div>
+    <div class="grid g2">
+      <div class="field"><label>ユーザー名</label><input type="text" id="ghUser" placeholder="pianoshop1214-commits"></div>
+      <div class="field"><label>リポジトリ名</label><input type="text" id="ghRepo" placeholder="kaikei-data"></div>
+      <div class="field"><label>ブランチ</label><input type="text" id="ghBranch" placeholder="main"></div>
+      <div class="field"><label>トークン</label><input type="password" id="ghToken" placeholder="github_pat_..."></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveGh()">保存</button>
+      <button class="btn" onclick="syncPush()">↑ この端末のデータを送る</button>
+      <button class="btn" onclick="syncPull()">↓ サーバーから取り込む</button>
+    </div>
+    <div id="ghResult" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <h2>バックアップ</h2>
+    <div class="btn-row">
+      <button class="btn" onclick="exportJson()">JSONを書き出す</button>
+      <button class="btn" onclick="document.getElementById('importJson').click()">JSONを読み込む</button>
+      <input type="file" id="importJson" accept=".json" style="display:none" onchange="importJsonFile(this.files[0])">
+      <button class="btn" onclick="importKeihi()">経費管理アプリから取り込む</button>
+      <button class="btn btn-danger" onclick="wipe()">全データ削除</button>
+    </div>
+    <div id="importResult" style="margin-top:12px"></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- ══ モーダル ══════════════════════════════════════ -->
+<div class="modal" id="fixedModal"><div class="modal-box">
+  <h2 id="fixedTitle">毎月かかるものを登録</h2>
+  <input type="hidden" id="fxId">
+  <div class="grid g2">
+    <div class="field"><label>名前</label><input type="text" id="fxName" placeholder="例：事務所家賃"></div>
+    <div class="field"><label>毎月の金額 <span class="hint">税込</span></label><input type="number" id="fxAmount"></div>
+    <div class="field"><label>何の費用？</label><select id="fxAccount"></select></div>
+    <div class="field"><label>どこから払う？</label><select id="fxPay"></select></div>
+    <div class="field"><label>毎月何日に計上する？</label><input type="number" id="fxDay" min="1" max="28" value="1"></div>
+    <div class="field"><label>事業で使う割合（％）</label><input type="number" id="fxRatio" min="0" max="100" value="100"></div>
+    <div class="field"><label>支払先</label><input type="text" id="fxPartner"></div>
+    <div class="field"><label>どの事業？</label><select id="fxBiz"></select></div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn btn-danger" id="fxDelBtn" onclick="deleteFixed()" style="margin-right:auto;display:none">削除</button>
+    <button class="btn" onclick="closeModal('fixedModal')">やめる</button>
+    <button class="btn btn-primary" onclick="saveFixed()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal" id="assetModal"><div class="modal-box">
+  <h2 id="assetTitle">減価償却の資産を登録</h2>
+  <input type="hidden" id="asId">
+  <div class="grid g2">
+    <div class="field"><label>資産の名前</label><input type="text" id="asName" placeholder="例：MacBook Pro"></div>
+    <div class="field"><label>買った金額 <span class="hint">税込</span></label><input type="number" id="asCost"></div>
+    <div class="field"><label>使い始めた日</label><input type="date" id="asDate"></div>
+    <div class="field"><label>償却のしかた</label><select id="asMethod" onchange="onAssetMethod()">
+      <option value="teigaku">定額法（ふつうの減価償却）</option>
+      <option value="ikkatsu">一括償却（10〜20万円・3年で均等）</option>
+      <option value="shogaku">少額の特例（30万円未満・その年に全額）</option>
+    </select></div>
+    <div class="field" id="asLifeField"><label>耐用年数</label><select id="asLife"></select></div>
+    <div class="field"><label>事業で使う割合（％）</label><input type="number" id="asRatio" min="0" max="100" value="100"></div>
+    <div class="field"><label>資産の科目</label><select id="asAccount"></select></div>
+    <div class="field"><label>どの事業？</label><select id="asBiz"></select></div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn btn-danger" id="asDelBtn" onclick="deleteAsset()" style="margin-right:auto;display:none">削除</button>
+    <button class="btn" onclick="closeModal('assetModal')">やめる</button>
+    <button class="btn btn-primary" onclick="saveAsset()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal" id="ratioModal"><div class="modal-box">
+  <h2>事業で使う割合（家事按分）</h2>
+  <div class="info">自宅兼事務所などで私用と共用している経費の「事業で使う割合」を決めます。ここで決めた％が、入力時の初期値になります。</div>
+  <div id="ratioBody"></div>
+  <div class="modal-actions">
+    <button class="btn" onclick="closeModal('ratioModal')">やめる</button>
+    <button class="btn btn-primary" onclick="saveRatios()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal" id="openingModal"><div class="modal-box">
+  <h2>年のはじめの残高（<span id="opYear"></span>年1月1日時点）</h2>
+  <div class="info">年の初めに持っていた事業用の現金・預金・借入などを入力します。開業した年は、開業日の残高でOKです。差額は自動で元入金になります。</div>
+  <div id="openingBody"></div>
+  <div class="modal-actions">
+    <button class="btn" onclick="closeModal('openingModal')">やめる</button>
+    <button class="btn btn-primary" onclick="saveOpening()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal" id="rcpModal"><div class="modal-box" style="max-width:600px">
+  <h2>レシートの内容を確認</h2>
+  <input type="hidden" id="rcId">
+  <img id="rcImg" class="preview-img" alt="レシート" style="margin-bottom:15px">
+  <div id="rcAi" class="info" style="display:none"></div>
+  <div class="grid g2">
+    <div class="field"><label>日付</label><input type="date" id="rcDate"></div>
+    <div class="field"><label>金額 <span class="hint">税込</span></label><input type="number" id="rcAmount"></div>
+    <div class="field"><label>お店・取引先</label><input type="text" id="rcPartner"></div>
+    <div class="field"><label>何に使った？</label><select id="rcAccount"></select></div>
+    <div class="field"><label>どこから払った？</label><select id="rcPay"></select></div>
+    <div class="field"><label>どの事業？</label><select id="rcBiz"></select></div>
+  </div>
+  <details>
+    <summary>くわしく設定</summary>
+    <div class="details-body">
+      <div class="grid g2">
+        <div class="field"><label>事業で使う割合（％）</label><input type="number" id="rcRatio" min="0" max="100" value="100"></div>
+        <div class="field"><label>税区分（記録用）</label><select id="rcTax"><option value="10">10%</option><option value="8">8%（軽減）</option><option value="0">対象外</option></select></div>
+      </div>
+      <div class="field"><label>メモ</label><input type="text" id="rcDesc"></div>
+    </div>
+  </details>
+  <div class="modal-actions">
+    <button class="btn btn-danger" id="rcDelBtn" onclick="deleteReceipt()" style="margin-right:auto">削除</button>
+    <button class="btn" onclick="closeModal('rcpModal')">やめる</button>
+    <button class="btn btn-primary" onclick="confirmReceipt()">この内容で記帳</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   定数
+   ══════════════════════════════════════════════════════════ */
+const KEY = 'kaikei_v1';
+const KEIHI_KEY = 'keihi_manager_v1';
+const API_URL = 'https://api.anthropic.com/v1/messages';
+
+/* 勘定科目マスタ（青色申告決算書の標準科目）
+   t: asset 資産 / liability 負債 / equity 資本 / revenue 収益 / expense 費用
+   s: 'D' 借方残 / 'C' 貸方残 */
+const ACCOUNTS = [
+  { n:'現金',          t:'asset', s:'D', pay:1 },
+  { n:'普通預金',      t:'asset', s:'D', pay:1 },
+  { n:'売掛金',        t:'asset', s:'D' },
+  { n:'棚卸資産',      t:'asset', s:'D' },
+  { n:'工具器具備品',  t:'asset', s:'D' },
+  { n:'車両運搬具',    t:'asset', s:'D' },
+  { n:'一括償却資産',  t:'asset', s:'D' },
+  { n:'事業主貸',      t:'asset', s:'D' },
+  { n:'買掛金',        t:'liability', s:'C' },
+  { n:'未払金',        t:'liability', s:'C', pay:1 },
+  { n:'借入金',        t:'liability', s:'C' },
+  { n:'事業主借',      t:'equity', s:'C', pay:1 },
+  { n:'元入金',        t:'equity', s:'C' },
+  { n:'売上高',        t:'revenue', s:'C' },
+  { n:'家事消費',      t:'revenue', s:'C' },
+  { n:'雑収入',        t:'revenue', s:'C' },
+  { n:'仕入高',        t:'expense', s:'D' },
+  { n:'租税公課',      t:'expense', s:'D' },
+  { n:'荷造運賃',      t:'expense', s:'D' },
+  { n:'水道光熱費',    t:'expense', s:'D', kaji:1 },
+  { n:'旅費交通費',    t:'expense', s:'D' },
+  { n:'通信費',        t:'expense', s:'D', kaji:1 },
+  { n:'広告宣伝費',    t:'expense', s:'D' },
+  { n:'接待交際費',    t:'expense', s:'D' },
+  { n:'損害保険料',    t:'expense', s:'D', kaji:1 },
+  { n:'修繕費',        t:'expense', s:'D' },
+  { n:'消耗品費',      t:'expense', s:'D' },
+  { n:'減価償却費',    t:'expense', s:'D' },
+  { n:'福利厚生費',    t:'expense', s:'D' },
+  { n:'給料賃金',      t:'expense', s:'D' },
+  { n:'外注工賃',      t:'expense', s:'D' },
+  { n:'利子割引料',    t:'expense', s:'D' },
+  { n:'地代家賃',      t:'expense', s:'D', kaji:1 },
+  { n:'貸倒金',        t:'expense', s:'D' },
+  { n:'新聞図書費',    t:'expense', s:'D' },
+  { n:'支払手数料',    t:'expense', s:'D' },
+  { n:'研修費',        t:'expense', s:'D' },
+  { n:'車両費',        t:'expense', s:'D', kaji:1 },
+  { n:'雑費',          t:'expense', s:'D' },
+];
+const AC = {};
+ACCOUNTS.forEach(a => AC[a.n] = a);
+const EXPENSE_ACCS = ACCOUNTS.filter(a => a.t === 'expense').map(a => a.n);
+const REVENUE_ACCS = ACCOUNTS.filter(a => a.t === 'revenue').map(a => a.n);
+const PAY_ACCS     = ACCOUNTS.filter(a => a.pay).map(a => a.n);
+const RECV_ACCS    = ['普通預金', '現金', '売掛金', '事業主借'];
+const KAJI_ACCS    = ACCOUNTS.filter(a => a.kaji).map(a => a.n);
+
+/* 勘定科目のやさしい説明（選択肢に添える） */
+const ACC_HINT = {
+  '旅費交通費':'電車・バス・タクシー・出張', '通信費':'携帯・ネット・切手',
+  '消耗品費':'文房具・小物・10万円未満の備品', '接待交際費':'打合せの飲食・お礼・お中元',
+  '新聞図書費':'本・雑誌・新聞', '水道光熱費':'電気・ガス・水道', '地代家賃':'家賃・駐車場代',
+  '広告宣伝費':'チラシ・広告・名刺', '支払手数料':'振込手数料・各種手数料',
+  '車両費':'ガソリン・車検・駐車場', '研修費':'セミナー・講座', '外注工賃':'外部への発注',
+  '福利厚生費':'健康診断・慶弔費', '租税公課':'収入印紙・固定資産税・自動車税',
+  '損害保険料':'火災保険・自動車保険', '荷造運賃':'宅配便・梱包材', '修繕費':'修理・メンテナンス',
+  '仕入高':'売るために買ったもの', '給料賃金':'従業員への給与', '利子割引料':'借入金の利息',
+  '減価償却費':'高額な資産の年間償却分', '貸倒金':'回収できなくなった売掛金',
+  '雑費':'どれにも当てはまらないもの',
+};
+const REV_HINT = { '売上高':'本業の売上', '雑収入':'本業以外の収入（助成金など）', '家事消費':'商品を自分で使った分' };
+const PAY_HINT = {
+  '現金':'現金で払った', '普通預金':'事業用の口座から', '未払金':'まだ払っていない（後払い）',
+  '事業主借':'プライベートのお金・個人カードで払った',
+};
+const RECV_HINT = {
+  '普通預金':'事業用の口座に入金', '現金':'現金で受け取った',
+  '売掛金':'まだ入金されていない', '事業主借':'プライベートの口座に入金',
+};
+
+const BUSINESSES = {
+  shouta:      { label: 'しょうたの歩き方',         color: '#4a6db8' },
+  consonantia: { label: 'コンソナンティア ピアノス', color: '#bd8a2a' },
+  pirika:      { label: 'ピリカルキナ',              color: '#12968b' },
+  common:      { label: '共通',                     color: '#8a877e' },
+};
+
+/* 定額法の償却率（平成19年4月1日以後取得） */
+const TEIGAKU_RATE = {
+  2:0.500, 3:0.334, 4:0.250, 5:0.200, 6:0.167, 7:0.143, 8:0.125, 9:0.112,
+  10:0.100, 11:0.091, 12:0.084, 13:0.077, 14:0.072, 15:0.067, 17:0.059,
+  20:0.050, 22:0.046, 24:0.042, 30:0.034, 38:0.027, 47:0.022,
+};
+const LIFE_OPTIONS = [
+  [4, '4年 — パソコン・電子楽器'], [5, '5年 — 事務机・カメラ・楽器'],
+  [6, '6年 — 普通自動車・応接セット'], [8, '8年 — 業務用エアコン・冷蔵庫'],
+  [10, '10年 — ピアノ・大型家具'], [15, '15年 — 内装工事'],
+  [2, '2年 — 中古品（簡便法）'], [3, '3年 — ソフトウェア'],
+  [7, '7年'], [12, '12年'], [17, '17年'], [22, '22年 — 木造建物'], [47, '47年 — RC建物'],
+];
+
+const TAX_BRACKETS = [
+  [1950000, 0.05, 0], [3300000, 0.10, 97500], [6950000, 0.20, 427500],
+  [9000000, 0.23, 636000], [18000000, 0.33, 1536000], [40000000, 0.40, 2796000],
+  [Infinity, 0.45, 4796000],
+];
+
+/* ══════════════════════════════════════════════════════════
+   状態
+   ══════════════════════════════════════════════════════════ */
+let db = null;
+let mode = 'exp';
+let queue = [];
+let imgCache = {};
+
+function blank() {
+  return {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    year: new Date().getFullYear(),
+    profile: { name: '', deduction: 650000 },
+    journals: [], receipts: [], fixed: [], fixedApplied: {}, assets: [],
+    ratios: {}, opening: {}, learn: {},
+    api: { key: '', model: 'claude-haiku-4-5' },
+    gh: { user: '', repo: '', branch: 'main', token: '' },
+  };
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    db = raw ? Object.assign(blank(), JSON.parse(raw)) : blank();
+  } catch (e) { db = blank(); }
+  ['ratios', 'opening', 'learn', 'fixedApplied'].forEach(k => { if (!db[k]) db[k] = {}; });
+  ['journals', 'receipts', 'fixed', 'assets'].forEach(k => { if (!Array.isArray(db[k])) db[k] = []; });
+}
+function save() {
+  db.updatedAt = new Date().toISOString();
+  try {
+    localStorage.setItem(KEY, JSON.stringify(db));
+  } catch (e) {
+    alert('保存できませんでした。ブラウザの保存容量がいっぱいの可能性があります。\n設定 → 携帯とPCでデータを共有 で画像をサーバーに逃がすか、JSONを書き出してください。');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ユーティリティ
+   ══════════════════════════════════════════════════════════ */
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const yen = n => '¥' + Math.round(n || 0).toLocaleString('ja-JP');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const ymd = d => (d || '').slice(0, 10);
+const monthOf = d => (d || '').slice(0, 7);
+const val = id => (document.getElementById(id) || {}).value;
+
+function showToast(msg, ms) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), ms || 2800);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+
+function fillSelect(el, items, selected, placeholder) {
+  if (!el) return;
+  el.innerHTML = (placeholder ? `<option value="">${placeholder}</option>` : '') +
+    items.map(i => {
+      const v = Array.isArray(i) ? i[0] : i, l = Array.isArray(i) ? i[1] : i;
+      return `<option value="${esc(v)}"${String(v) === String(selected) ? ' selected' : ''}>${esc(l)}</option>`;
+    }).join('');
+}
+/* 説明つきの選択肢 */
+function withHint(names, hints) {
+  return names.map(n => [n, hints[n] ? `${n} — ${hints[n]}` : n]);
+}
+function bizOptions() { return Object.entries(BUSINESSES).map(([k, v]) => [k, v.label]); }
+function bizLabel(k) { return (BUSINESSES[k] || { label: k || '—' }).label; }
+function typeLabel(t) { return { asset:'資産', liability:'負債', equity:'資本', revenue:'収益', expense:'費用' }[t] || t; }
+
+/* ══════════════════════════════════════════════════════════
+   会計エンジン
+   ══════════════════════════════════════════════════════════ */
+function yearJournals(y) {
+  y = y || db.year;
+  return db.journals.filter(j => (j.date || '').slice(0, 4) === String(y))
+                    .sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id));
+}
+function balances(y) {
+  const b = {};
+  yearJournals(y).forEach(j => (j.lines || []).forEach(l => {
+    if (!b[l.ac]) b[l.ac] = { d: 0, c: 0 };
+    b[l.ac][l.side === 'D' ? 'd' : 'c'] += Number(l.amt) || 0;
+  }));
+  return b;
+}
+function balanceOf(b, acc) {
+  const x = b[acc]; if (!x) return 0;
+  const meta = AC[acc];
+  return (meta && meta.s === 'C') ? x.c - x.d : x.d - x.c;
+}
+function plData(y) {
+  const b = balances(y);
+  const rev = REVENUE_ACCS.map(n => [n, balanceOf(b, n)]).filter(x => x[1] !== 0);
+  const exp = EXPENSE_ACCS.map(n => [n, balanceOf(b, n)]).filter(x => x[1] !== 0);
+  const revTotal = rev.reduce((s, x) => s + x[1], 0);
+  const expTotal = exp.reduce((s, x) => s + x[1], 0);
+  return { rev, exp, revTotal, expTotal, profit: revTotal - expTotal };
+}
+function bsData(y) {
+  const b = balances(y);
+  const pl = plData(y);
+  const assets = ACCOUNTS.filter(a => a.t === 'asset').map(a => [a.n, balanceOf(b, a.n)]).filter(x => x[1] !== 0);
+  const liab   = ACCOUNTS.filter(a => a.t === 'liability').map(a => [a.n, balanceOf(b, a.n)]).filter(x => x[1] !== 0);
+  const motoire = balanceOf(b, '元入金');
+  const nushiKari = balanceOf(b, '事業主借');
+  const assetTotal = assets.reduce((s, x) => s + x[1], 0);
+  const liabTotal  = liab.reduce((s, x) => s + x[1], 0);
+  const capital = motoire + nushiKari + pl.profit;
+  return { assets, liab, motoire, nushiKari, profit: pl.profit, assetTotal, liabTotal, capital,
+           diff: assetTotal - (liabTotal + capital) };
+}
+function incomeTax(taxable) {
+  const t = Math.max(0, Math.floor(taxable / 1000) * 1000);
+  for (const [cap, rate, ded] of TAX_BRACKETS) {
+    if (t <= cap) return Math.max(0, Math.floor(Math.floor(t * rate - ded) * 1.021));
+  }
+  return 0;
+}
+function addJournal(j) {
+  j.id = j.id || uid();
+  db.journals.push(j);
+  if (j.partner && j.lines) {
+    const exp = j.lines.find(l => l.side === 'D' && AC[l.ac] && AC[l.ac].t === 'expense');
+    if (exp) db.learn[j.partner] = exp.ac;
+  }
+  return j;
+}
+function buildExpense({ date, amount, account, pay, ratio, partner, desc, biz, receiptId, src }) {
+  const r = Math.min(100, Math.max(0, Number(ratio == null ? 100 : ratio))) / 100;
+  const bizAmt = Math.round(amount * r);
+  const priv = amount - bizAmt;
+  const lines = [{ ac: account, side: 'D', amt: bizAmt }];
+  if (priv > 0) lines.push({ ac: '事業主貸', side: 'D', amt: priv });
+  lines.push({ ac: pay, side: 'C', amt: amount });
+  return { id: uid(), date, lines, desc: desc || '', partner: partner || '', biz: biz || 'common',
+           receiptId: receiptId || null, src: src || 'manual', ratio: Math.round(r * 100) };
+}
+function buildRevenue({ date, amount, account, recv, partner, desc, biz }) {
+  return { id: uid(), date, lines: [{ ac: recv, side: 'D', amt: amount }, { ac: account, side: 'C', amt: amount }],
+           desc: desc || '', partner: partner || '', biz: biz || 'common', src: 'manual' };
+}
+
+/* ══════════════════════════════════════════════════════════
+   タブ
+   ══════════════════════════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  const p = document.getElementById('panel-' + name);
+  if (p) p.classList.add('active');
+  window.scrollTo(0, 0);
+  if (name === 'home')  renderHome();
+  if (name === 'trade') { renderFixed(); renderMonthTbl(); renderReceipts(); renderApiWarn(); refreshPreview(); }
+  if (name === 'books') renderBooks();
+  if (name === 'close') renderClose();
+  if (name === 'settings') renderSettings();
+}
+document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+/* ══════════════════════════════════════════════════════════
+   ホーム
+   ══════════════════════════════════════════════════════════ */
+function renderHome() {
+  const pl = plData(db.year);
+  const ded = Number(db.profile.deduction || 650000);
+  const afterBlue = Math.max(0, pl.profit - ded);
+  const taxable = Math.max(0, afterBlue - 480000);
+
+  document.getElementById('kpiRev').textContent = yen(pl.revTotal);
+  document.getElementById('kpiExp').textContent = yen(pl.expTotal);
+  const pe = document.getElementById('kpiProfit');
+  pe.textContent = yen(pl.profit);
+  pe.className = 'value ' + (pl.profit >= 0 ? 'amt-pos' : 'amt-neg');
+
+  const js = yearJournals(db.year);
+  document.getElementById('kpiRevNote').textContent = `記帳 ${js.length} 件`;
+  document.getElementById('kpiExpNote').textContent = `レシート ${db.receipts.filter(r => (r.date||'').slice(0,4) === String(db.year)).length} 枚`;
+  document.getElementById('kpiProfitNote').textContent = `税金の目安 ${yen(incomeTax(taxable))}（所得税）`;
+  document.getElementById('chartYear').textContent = db.year + '年';
+  document.getElementById('hdrYear').textContent = db.year;
+
+  renderTodos();
+  renderMonthChart();
+  renderExpBreak();
+  renderRecent();
+}
+
+function renderTodos() {
+  const items = [];
+  const unconf = db.receipts.filter(r => !r.journalId).length;
+  if (unconf) items.push(['📷', `未記帳のレシートが <b>${unconf}枚</b> あります`, 'trade', '確認する']);
+  const bs = bsData(db.year);
+  if (Math.abs(bs.diff) > 1) items.push(['⚖️', `貸借対照表が <b>${yen(Math.abs(bs.diff))}</b> 合いません。年のはじめの残高を入れてください`, null, '入力する', 'openOpening()']);
+  if (!db.api.key) items.push(['🔑', 'レシートの自動読み取りにはAPIキーの登録が必要です', 'settings', '設定する']);
+  if (!db.gh.token) items.push(['📱', '携帯でも使うには、データ共有（GitHub）を設定します', 'settings', '設定する']);
+  const undep = db.assets.filter(a => depreciationFor(a, db.year).amount > 0 &&
+    !db.journals.some(j => j.src === 'depreciation' && j.assetId === a.id && (j.date||'').slice(0,4) === String(db.year))).length;
+  if (undep) items.push(['🖥', `減価償却費が <b>${undep}件</b> 未記帳です（年末に計上します）`, 'close', '決算へ']);
+
+  const el = document.getElementById('homeAlerts');
+  if (!items.length) {
+    el.innerHTML = `<div class="todo"><div class="ico">✅</div><div class="txt">いまやることはありません。順調です。</div></div>`;
+    return;
+  }
+  el.innerHTML = items.map(([ico, txt, tab, btn, fn]) => `
+    <div class="todo">
+      <div class="ico">${ico}</div>
+      <div class="txt">${txt}</div>
+      <button class="btn btn-sm" onclick="${fn ? fn : `switchTab('${tab}')`}">${btn}</button>
+    </div>`).join('');
+}
+
+function renderMonthChart() {
+  const rev = new Array(12).fill(0), exp = new Array(12).fill(0);
+  yearJournals(db.year).forEach(j => {
+    const m = parseInt((j.date || '').slice(5, 7), 10) - 1;
+    if (m < 0 || m > 11) return;
+    (j.lines || []).forEach(l => {
+      const meta = AC[l.ac]; if (!meta) return;
+      if (meta.t === 'revenue') rev[m] += (l.side === 'C' ? 1 : -1) * l.amt;
+      if (meta.t === 'expense') exp[m] += (l.side === 'D' ? 1 : -1) * l.amt;
+    });
+  });
+  const max = Math.max(1, ...rev, ...exp);
+  const W = 560, H = 180, pad = 22, bw = (W - pad * 2) / 12;
+  let bars = '';
+  for (let m = 0; m < 12; m++) {
+    const x = pad + bw * m;
+    const rh = (rev[m] / max) * (H - 46), eh = (exp[m] / max) * (H - 46);
+    bars += `<rect x="${x + 3}" y="${H - 22 - rh}" width="${bw / 2 - 4}" height="${Math.max(0, rh)}" fill="#16a34a" rx="1"><title>${m+1}月 収入 ${yen(rev[m])}</title></rect>`;
+    bars += `<rect x="${x + bw / 2 + 1}" y="${H - 22 - eh}" width="${bw / 2 - 4}" height="${Math.max(0, eh)}" fill="#c14f4a" rx="1"><title>${m+1}月 経費 ${yen(exp[m])}</title></rect>`;
+    bars += `<text x="${x + bw / 2}" y="${H - 8}" font-size="9.5" text-anchor="middle" fill="#b3a68f">${m + 1}</text>`;
+  }
+  document.getElementById('monthChart').innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
+       <line x1="${pad}" y1="${H - 22}" x2="${W - pad}" y2="${H - 22}" stroke="#e8e2d6"/>${bars}
+     </svg>
+     <div style="font-size:12px;color:#8a7a63;text-align:center">
+       <span style="color:#16a34a">■</span> 収入　<span style="color:#c14f4a">■</span> 経費
+     </div>`;
+}
+
+function renderExpBreak() {
+  const pl = plData(db.year);
+  const rows = pl.exp.slice().sort((a, b) => b[1] - a[1]);
+  const t = pl.expTotal || 1;
+  document.getElementById('expBreak').innerHTML =
+    `<thead><tr><th>勘定科目</th><th class="num">金額</th><th class="num">比率</th></tr></thead><tbody>` +
+    (rows.length ? rows.map(([n, v]) =>
+      `<tr><td>${esc(n)}</td><td class="num">${yen(v)}</td><td class="num muted">${(v / t * 100).toFixed(1)}%</td></tr>`).join('')
+      + `<tr class="total"><td>合計</td><td class="num">${yen(pl.expTotal)}</td><td class="num">100%</td></tr>`
+      : `<tr><td colspan="3" class="empty">まだ経費がありません</td></tr>`) + `</tbody>`;
+}
+
+function renderRecent() {
+  const js = yearJournals(db.year).slice(-10).reverse();
+  document.getElementById('recentTbl').innerHTML =
+    `<thead><tr><th>日付</th><th>内容</th><th>科目</th><th class="num">金額</th></tr></thead><tbody>` +
+    (js.length ? js.map(j => {
+      const D = (j.lines || []).filter(l => l.side === 'D');
+      const amt = (j.lines || []).filter(l => l.side === 'C').reduce((s, l) => s + l.amt, 0);
+      const main = D.find(l => AC[l.ac] && AC[l.ac].t === 'expense') || D[0] || {};
+      const isRev = (j.lines || []).some(l => l.side === 'C' && AC[l.ac] && AC[l.ac].t === 'revenue');
+      return `<tr><td>${esc(j.date.slice(5).replace('-', '/'))}</td>
+        <td>${esc(j.desc || '—')}${j.partner ? `<br><span class="muted" style="font-size:11.5px">${esc(j.partner)}</span>` : ''}</td>
+        <td>${esc(isRev ? (j.lines.find(l => l.side === 'C') || {}).ac : main.ac)}</td>
+        <td class="num ${isRev ? 'amt-pos' : ''}">${isRev ? '+' : ''}${yen(amt)}</td></tr>`;
+    }).join('') : `<tr><td colspan="4" class="empty">まだ記帳がありません</td></tr>`) + `</tbody>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   かんたん入力
+   ══════════════════════════════════════════════════════════ */
+function setMode(m) {
+  mode = m;
+  document.getElementById('modeExpBtn').className = m === 'exp' ? 'on' : '';
+  document.getElementById('modeRevBtn').className = m === 'rev' ? 'on' : '';
+  if (m === 'exp') {
+    document.getElementById('inAccLabel').textContent = '何に使った？';
+    document.getElementById('inPayLabel').textContent = 'どこから払った？';
+    fillSelect(document.getElementById('inAccount'), withHint(EXPENSE_ACCS, ACC_HINT), '消耗品費');
+    fillSelect(document.getElementById('inPay'), withHint(PAY_ACCS, PAY_HINT), '事業主借');
+    document.getElementById('ratioField').style.display = '';
+  } else {
+    document.getElementById('inAccLabel').textContent = '何の収入？';
+    document.getElementById('inPayLabel').textContent = 'どこに入った？';
+    fillSelect(document.getElementById('inAccount'), withHint(REVENUE_ACCS, REV_HINT), '売上高');
+    fillSelect(document.getElementById('inPay'), withHint(RECV_ACCS, RECV_HINT), '普通預金');
+    document.getElementById('ratioField').style.display = 'none';
+  }
+  onAccountChange();
+}
+
+function onAccountChange() {
+  if (mode === 'exp') {
+    const acc = val('inAccount');
+    const r = db.ratios[acc];
+    document.getElementById('inRatio').value = (r == null ? 100 : r);
+    document.getElementById('ratioHint').textContent =
+      r != null && r < 100 ? `（設定済み：${r}%）` : (KAJI_ACCS.includes(acc) ? '按分することが多い科目です' : '全額事業なら100のまま');
+    /* 按分が設定されている科目なら詳細を自動で開く */
+    if (r != null && r < 100) document.getElementById('moreDetails').open = true;
+  }
+  refreshPreview();
+}
+function onPartnerChange() {
+  const p = (val('inPartner') || '').trim();
+  if (mode === 'exp' && p && db.learn[p]) {
+    document.getElementById('inAccount').value = db.learn[p];
+    onAccountChange();
+    showToast(`「${p}」は前回「${db.learn[p]}」でした`);
+  }
+  refreshPreview();
+}
+
+function refreshPreview() {
+  const el = document.getElementById('preview');
+  if (!el) return;
+  const amt = Number(val('inAmount')) || 0;
+  if (!amt) { el.innerHTML = ''; return; }
+  const j = mode === 'exp'
+    ? buildExpense({ date: val('inDate'), amount: amt, account: val('inAccount'), pay: val('inPay'), ratio: val('inRatio') })
+    : buildRevenue({ date: val('inDate'), amount: amt, account: val('inAccount'), recv: val('inPay') });
+  el.innerHTML = '作られる仕訳：' + j.lines.map(l =>
+    `<span style="white-space:nowrap">${l.side === 'D' ? '借' : '貸'} ${esc(l.ac)} ${yen(l.amt)}</span>`).join(' ／ ');
+}
+
+function saveSimple() {
+  const date = val('inDate');
+  const amt = Number(val('inAmount')) || 0;
+  if (!date || !amt) return showToast('日付と金額を入れてください');
+  const common = { date, amount: amt, account: val('inAccount'),
+    partner: (val('inPartner') || '').trim(), desc: val('inDesc'), biz: val('inBiz') };
+  addJournal(mode === 'exp'
+    ? buildExpense(Object.assign(common, { pay: val('inPay'), ratio: val('inRatio') }))
+    : buildRevenue(Object.assign(common, { recv: val('inPay') })));
+  save();
+  showToast(mode === 'exp' ? '支出を記帳しました' : '収入を記帳しました');
+  resetSimple();
+  renderMonthTbl();
+  refreshPartnerList();
+}
+
+function saveJournalDirect() {
+  const date = val('jDate');
+  const da = Number(val('jDebitAmt')) || 0;
+  const ca = Number(val('jCreditAmt')) || 0;
+  if (!date || !da || !ca) return showToast('日付と金額を入れてください');
+  if (Math.abs(da - ca) > 0.5) return showToast(`借方と貸方が ${yen(Math.abs(da - ca))} 合っていません`);
+  addJournal({ id: uid(), date,
+    lines: [{ ac: val('jDebit'), side: 'D', amt: da }, { ac: val('jCredit'), side: 'C', amt: ca }],
+    desc: val('jDesc'), partner: val('jPartner'), biz: val('jBiz'), src: 'manual' });
+  save();
+  ['jDebitAmt', 'jCreditAmt', 'jDesc', 'jPartner'].forEach(id => document.getElementById(id).value = '');
+  showToast('仕訳を記帳しました');
+  renderMonthTbl();
+}
+
+function resetSimple() {
+  ['inAmount', 'inPartner', 'inDesc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('inDate').value = today();
+  onAccountChange();
+}
+
+function renderMonthTbl() {
+  const m = monthOf(today());
+  document.getElementById('thisMonthLabel').textContent = m.replace('-', '年') + '月';
+  const js = db.journals.filter(j => monthOf(j.date) === m).sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id));
+  document.getElementById('monthTbl').innerHTML =
+    `<thead><tr><th>日付</th><th>内容</th><th>科目</th><th>支払方法</th><th class="num">金額</th><th></th></tr></thead><tbody>` +
+    (js.length ? js.map(j => {
+      const D = j.lines.filter(l => l.side === 'D'), C = j.lines.filter(l => l.side === 'C');
+      const amt = C.reduce((s, l) => s + l.amt, 0);
+      const isRev = C.some(l => AC[l.ac] && AC[l.ac].t === 'revenue');
+      const main = isRev ? (C.find(l => AC[l.ac] && AC[l.ac].t === 'revenue') || {}).ac
+                         : (D.find(l => AC[l.ac] && AC[l.ac].t === 'expense') || D[0] || {}).ac;
+      const other = isRev ? (D[0] || {}).ac : (C[0] || {}).ac;
+      const kaji = D.find(l => l.ac === '事業主貸');
+      return `<tr><td>${esc(j.date.slice(5).replace('-', '/'))}</td>
+        <td>${esc(j.desc || '—')}${j.partner ? `<br><span class="muted" style="font-size:11.5px">${esc(j.partner)}</span>` : ''}</td>
+        <td>${esc(main)}${kaji ? `<br><span class="muted" style="font-size:11.5px">按分 ${j.ratio}%</span>` : ''}</td>
+        <td class="muted">${esc(other)}</td>
+        <td class="num ${isRev ? 'amt-pos' : ''}">${isRev ? '+' : ''}${yen(amt)}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="delJournal('${j.id}')">削除</button></td></tr>`;
+    }).join('') : `<tr><td colspan="6" class="empty">今月の記帳はまだありません</td></tr>`) + `</tbody>`;
+}
+
+function delJournal(id) {
+  const j = db.journals.find(x => x.id === id);
+  if (!j) return;
+  if (!confirm('この記帳を削除しますか？')) return;
+  db.journals = db.journals.filter(x => x.id !== id);
+  if (j.receiptId) {
+    const r = db.receipts.find(x => x.id === j.receiptId);
+    if (r) r.journalId = null;
+  }
+  save(); renderMonthTbl(); renderReceipts(); showToast('削除しました');
+}
+
+function refreshPartnerList() {
+  const set = new Set();
+  db.journals.forEach(j => j.partner && set.add(j.partner));
+  document.getElementById('partnerList').innerHTML = [...set].map(p => `<option value="${esc(p)}">`).join('');
+}
+
+/* ══════════════════════════════════════════════════════════
+   レシート → AI 読み取り
+   ══════════════════════════════════════════════════════════ */
+function renderApiWarn() {
+  document.getElementById('apiWarn').innerHTML = db.api.key ? '' :
+    `<div class="warn">APIキーが未設定です。撮影と手入力はできますが、自動読み取りは動きません。
+     <button class="btn btn-sm" onclick="switchTab('settings')">設定する</button></div>`;
+}
+
+async function onShot(files) {
+  if (!files || !files.length) return;
+  for (const f of files) {
+    let dataUrl;
+    try { dataUrl = await resizeImage(f, 1600, 0.82); }
+    catch (e) { showToast('画像を読み込めませんでした'); continue; }
+    const item = { id: uid(), dataUrl, status: db.api.key ? 'reading' : 'manual', ai: null, err: null };
+    queue.push(item);
+    renderQueue();
+    if (db.api.key) {
+      readReceipt(item).catch(e => { item.status = 'error'; item.err = e.message; renderQueue(); });
+    }
+  }
+  document.getElementById('shotInput').value = '';
+}
+
+function resizeImage(file, maxSide, quality) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      res(cv.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('画像を読み込めませんでした')); };
+    img.src = url;
+  });
+}
+
+const AI_PROMPT = `あなたは日本の個人事業主の記帳を助けるアシスタントです。添付されたレシート・領収書の画像を読み取り、JSONだけを出力してください。説明文やコードフェンスは書かないでください。
+
+出力するJSON:
+{
+  "is_receipt": true/false,
+  "date": "YYYY-MM-DD",
+  "partner": "店名・支払先",
+  "amount": 合計金額(税込・整数),
+  "tax_rate": 10 または 8 または 0,
+  "account": "勘定科目",
+  "description": "何を買ったか(20字以内)",
+  "confidence": 0.0〜1.0
+}
+
+ルール:
+- "account" は次のいずれかから必ず選ぶ: ${EXPENSE_ACCS.join(' / ')}
+- 迷ったら業種と品目から最も近いものを選ぶ。例: カフェでの打合せ→接待交際費、電車・タクシー→旅費交通費、書籍→新聞図書費、文房具・小物→消耗品費、携帯・ネット→通信費、電気ガス水道→水道光熱費、ガソリン・駐車場→車両費、判断できないもの→雑費
+- 年が書かれていない場合は今年（${new Date().getFullYear()}年）とみなす
+- 合計が読み取れない場合は amount を 0、confidence を 0.2 以下にする
+- レシートでない画像なら is_receipt を false にする`;
+
+async function readReceipt(item) {
+  const b64 = item.dataUrl.split(',')[1];
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': db.api.key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: db.api.model || 'claude-haiku-4-5',
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
+          { type: 'text', text: AI_PROMPT },
+        ],
+      }],
+    }),
+  });
+  if (!res.ok) throw new Error(`API エラー ${res.status}：${(await res.text()).slice(0, 200)}`);
+  const json = await res.json();
+  const text = (json.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
+  item.ai = parseAiJson(text);
+  item.status = 'ready';
+  renderQueue();
+}
+
+function parseAiJson(text) {
+  let s = String(text || '').trim();
+  s = s.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+  const a = s.indexOf('{'), b = s.lastIndexOf('}');
+  if (a >= 0 && b > a) s = s.slice(a, b + 1);
+  try { return JSON.parse(s); } catch (e) { throw new Error('AIの返答を読み取れませんでした'); }
+}
+
+function renderQueue() {
+  const card = document.getElementById('queueCard');
+  card.style.display = queue.length ? '' : 'none';
+  document.getElementById('queueCount').textContent = queue.length ? `${queue.length}枚` : '';
+  document.getElementById('queueList').innerHTML = queue.map((q, i) => {
+    let body;
+    if (q.status === 'reading') body = `<span class="spinner"></span> AIが読み取り中…`;
+    else if (q.status === 'error') body = `<span class="amt-neg">読み取り失敗</span> <span class="muted">${esc(q.err)}</span><br>手入力で登録できます`;
+    else if (q.status === 'manual') body = `APIキー未設定のため手入力で登録します`;
+    else {
+      const a = q.ai || {};
+      if (a.is_receipt === false) body = `<span class="amt-neg">レシートとして認識できませんでした</span>`;
+      else body = `<b>${esc(a.partner || '—')}</b> ／ ${esc(a.date || '—')}<br><b>${yen(a.amount || 0)}</b> ／ ${esc(a.account || '雑費')}
+        <span class="muted">（確信度 ${Math.round((a.confidence || 0) * 100)}%）</span>`;
+    }
+    return `<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--hairline)">
+      <img src="${q.dataUrl}" style="width:54px;height:54px;object-fit:cover;border-radius:4px;flex:none">
+      <div style="flex:1;min-width:0;font-size:13px;line-height:1.6">${body}</div>
+      <button class="btn btn-sm btn-primary" onclick="openQueueItem(${i})" ${q.status === 'reading' ? 'disabled' : ''}>確認</button>
+      <button class="btn btn-sm btn-danger" onclick="dropQueue(${i})">破棄</button>
+    </div>`;
+  }).join('');
+}
+function dropQueue(i) { queue.splice(i, 1); renderQueue(); }
+
+function openQueueItem(i) {
+  const q = queue[i];
+  const a = q.ai || {};
+  const partner = a.partner || '';
+  const learned = partner && db.learn[partner];
+  editReceipt({
+    id: q.id, dataUrl: q.dataUrl, _queueIndex: i,
+    date: a.date && /^\d{4}-\d{2}-\d{2}$/.test(a.date) ? a.date : today(),
+    partner, amount: a.amount || 0,
+    account: learned || (EXPENSE_ACCS.includes(a.account) ? a.account : '雑費'),
+    desc: a.description || '', tax: a.tax_rate == null ? 10 : a.tax_rate,
+    _aiNote: q.status === 'ready' && a.is_receipt !== false
+      ? `AIが読み取った内容を入れています。ちがっていれば直してください。${learned ? `<br>過去の記録から「${esc(partner)}」は <b>${esc(learned)}</b> にしました。` : ''}`
+      : null,
+  });
+}
+
+function editReceipt(r) {
+  document.getElementById('rcId').value = r.id;
+  document.getElementById('rcImg').src = r.dataUrl || '';
+  document.getElementById('rcDate').value = r.date || today();
+  document.getElementById('rcAmount').value = r.amount || '';
+  document.getElementById('rcPartner').value = r.partner || '';
+  document.getElementById('rcDesc').value = r.desc || '';
+  fillSelect(document.getElementById('rcAccount'), withHint(EXPENSE_ACCS, ACC_HINT), r.account || '雑費');
+  fillSelect(document.getElementById('rcPay'), withHint(PAY_ACCS, PAY_HINT), r.pay || '事業主借');
+  fillSelect(document.getElementById('rcBiz'), bizOptions(), r.biz || 'common');
+  document.getElementById('rcRatio').value = r.ratio != null ? r.ratio : (db.ratios[r.account] != null ? db.ratios[r.account] : 100);
+  document.getElementById('rcTax').value = r.tax != null ? r.tax : 10;
+  const note = document.getElementById('rcAi');
+  note.style.display = r._aiNote ? '' : 'none';
+  note.innerHTML = r._aiNote || '';
+  const modal = document.getElementById('rcpModal');
+  modal.dataset.qi = r._queueIndex == null ? '' : r._queueIndex;
+  openModal('rcpModal');
+}
+
+async function confirmReceipt() {
+  const id = val('rcId');
+  const date = val('rcDate');
+  const amount = Number(val('rcAmount')) || 0;
+  const partner = (val('rcPartner') || '').trim();
+  const account = val('rcAccount');
+  if (!date || !amount) return showToast('日付と金額を入れてください');
+
+  const modal = document.getElementById('rcpModal');
+  const qi = modal.dataset.qi;
+  let rec = db.receipts.find(r => r.id === id);
+  const dataUrl = (qi !== '' && queue[qi]) ? queue[qi].dataUrl : (rec ? rec.img : '');
+
+  if (!rec) {
+    rec = { id, date, partner, amount, account, tax: val('rcTax'),
+            img: dataUrl, imgPath: null, journalId: null, createdAt: new Date().toISOString() };
+    db.receipts.push(rec);
+  } else {
+    Object.assign(rec, { date, partner, amount, account, tax: val('rcTax') });
+    if (rec.journalId) {
+      db.journals = db.journals.filter(j => j.id !== rec.journalId);
+      rec.journalId = null;
+    }
+  }
+
+  const j = buildExpense({
+    date, amount, account, pay: val('rcPay'), ratio: val('rcRatio'), partner,
+    desc: val('rcDesc'), biz: val('rcBiz'), receiptId: rec.id, src: 'receipt',
+  });
+  addJournal(j);
+  rec.journalId = j.id;
+  save();
+
+  if (qi !== '') { queue.splice(Number(qi), 1); renderQueue(); }
+  closeModal('rcpModal');
+  showToast('記帳しました');
+  renderReceipts(); renderMonthTbl(); refreshPartnerList();
+
+  /* GitHub 設定済みなら画像を退避して端末の容量を空ける */
+  if (db.gh.token && db.gh.repo && rec.img && !rec.imgPath) {
+    try {
+      await ghPutFile(`receipts/${rec.id}.jpg`, rec.img.split(',')[1], `receipt ${rec.date} ${rec.partner}`);
+      imgCache[rec.id] = rec.img;
+      rec.imgPath = `receipts/${rec.id}.jpg`;
+      rec.img = null;
+      save(); renderReceipts();
+    } catch (e) { console.warn('画像アップロード失敗', e); }
+  }
+}
+
+function deleteReceipt() {
+  const id = val('rcId');
+  const modal = document.getElementById('rcpModal');
+  const qi = modal.dataset.qi;
+  if (qi !== '') { queue.splice(Number(qi), 1); renderQueue(); closeModal('rcpModal'); return; }
+  if (!confirm('このレシートと、対応する記帳を削除しますか？')) return;
+  const rec = db.receipts.find(r => r.id === id);
+  if (rec && rec.journalId) db.journals = db.journals.filter(j => j.id !== rec.journalId);
+  db.receipts = db.receipts.filter(r => r.id !== id);
+  save(); closeModal('rcpModal'); renderReceipts(); renderMonthTbl(); showToast('削除しました');
+}
+
+function renderReceipts() {
+  const kw = ((val('rcpSearch') || '')).trim().toLowerCase();
+  document.getElementById('rcpCount').textContent = db.receipts.length ? `（${db.receipts.length}枚）` : '';
+  let list = db.receipts.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  if (kw) list = list.filter(r =>
+    (r.date || '').includes(kw) || String(r.amount || '').includes(kw) ||
+    (r.partner || '').toLowerCase().includes(kw) || (r.account || '').includes(kw));
+  const el = document.getElementById('receiptList');
+  if (!list.length) { el.innerHTML = `<div class="empty">${kw ? '見つかりませんでした' : 'まだレシートがありません'}</div>`; return; }
+  el.innerHTML = `<div class="receipt-grid">` + list.map(r => `
+    <div class="receipt-card" onclick="openExisting('${r.id}')">
+      <img src="${r.img || imgCache[r.id] || ''}" data-rid="${r.id}" alt="">
+      <div class="meta">
+        <div>${esc(r.date || '')}</div>
+        <div><b>${yen(r.amount)}</b></div>
+        <div class="muted">${esc(r.partner || '—')}</div>
+        <div class="muted">${esc(r.account || '')}${r.journalId ? '' : ' <span class="amt-neg">未記帳</span>'}</div>
+      </div>
+    </div>`).join('') + `</div>`;
+  list.forEach(r => { if (!r.img && r.imgPath && !imgCache[r.id]) lazyLoadImage(r); });
+}
+async function lazyLoadImage(r) {
+  if (!db.gh.token) return;
+  try {
+    const f = await ghGetFile(r.imgPath);
+    if (!f) return;
+    imgCache[r.id] = 'data:image/jpeg;base64,' + f.content.replace(/\n/g, '');
+    const el = document.querySelector(`img[data-rid="${r.id}"]`);
+    if (el) el.src = imgCache[r.id];
+  } catch (e) { /* 無視 */ }
+}
+function openExisting(id) {
+  const r = db.receipts.find(x => x.id === id);
+  if (!r) return;
+  const j = r.journalId ? db.journals.find(x => x.id === r.journalId) : null;
+  editReceipt({
+    id: r.id, dataUrl: r.img || imgCache[r.id] || '', date: r.date, amount: r.amount, partner: r.partner,
+    account: r.account, tax: r.tax, ratio: j ? j.ratio : 100, biz: j ? j.biz : 'common',
+    desc: j ? j.desc : '', pay: j ? (j.lines.find(l => l.side === 'C') || {}).ac : '事業主借',
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   固定費
+   ══════════════════════════════════════════════════════════ */
+function renderFixed() {
+  const total = db.fixed.reduce((s, f) => s + Number(f.amount || 0), 0);
+  document.getElementById('fixedTbl').innerHTML =
+    `<thead><tr><th>名前</th><th>科目</th><th>支払方法</th><th>計上日</th><th class="num">月額</th><th></th></tr></thead><tbody>` +
+    (db.fixed.length ? db.fixed.map(f => `
+      <tr><td><b>${esc(f.name)}</b>${f.partner ? `<br><span class="muted" style="font-size:11.5px">${esc(f.partner)}</span>` : ''}</td>
+        <td>${esc(f.account)}${f.ratio < 100 ? `<br><span class="muted" style="font-size:11.5px">按分 ${f.ratio}%</span>` : ''}</td>
+        <td class="muted">${esc(PAY_HINT[f.pay] || f.pay)}</td>
+        <td>毎月${f.day}日</td><td class="num">${yen(f.amount)}</td>
+        <td><button class="btn btn-sm" onclick="openFixed('${f.id}')">編集</button></td></tr>`).join('')
+      + `<tr class="total"><td colspan="4">毎月の合計</td><td class="num">${yen(total)}</td><td></td></tr>`
+      : `<tr><td colspan="6" class="empty">家賃・サブスク・通信費など、毎月決まって出ていくものを登録すると自動で記帳されます</td></tr>`) + `</tbody>`;
+}
+
+function openFixed(id) {
+  const f = id ? db.fixed.find(x => x.id === id) : null;
+  document.getElementById('fixedTitle').textContent = f ? '毎月かかるものを編集' : '毎月かかるものを登録';
+  document.getElementById('fxId').value = f ? f.id : '';
+  document.getElementById('fxName').value = f ? f.name : '';
+  document.getElementById('fxAmount').value = f ? f.amount : '';
+  document.getElementById('fxDay').value = f ? f.day : 1;
+  document.getElementById('fxRatio').value = f ? f.ratio : 100;
+  document.getElementById('fxPartner').value = f ? (f.partner || '') : '';
+  fillSelect(document.getElementById('fxAccount'), withHint(EXPENSE_ACCS, ACC_HINT), f ? f.account : '地代家賃');
+  fillSelect(document.getElementById('fxPay'), withHint(PAY_ACCS, PAY_HINT), f ? f.pay : '普通預金');
+  fillSelect(document.getElementById('fxBiz'), bizOptions(), f ? f.biz : 'common');
+  document.getElementById('fxDelBtn').style.display = f ? '' : 'none';
+  openModal('fixedModal');
+}
+function saveFixed() {
+  const id = val('fxId');
+  const name = (val('fxName') || '').trim();
+  const amount = Number(val('fxAmount')) || 0;
+  if (!name || !amount) return showToast('名前と金額を入れてください');
+  const rec = {
+    id: id || uid(), name, amount,
+    account: val('fxAccount'), pay: val('fxPay'),
+    day: Math.min(28, Math.max(1, Number(val('fxDay')) || 1)),
+    ratio: Math.min(100, Math.max(0, Number(val('fxRatio')) || 100)),
+    partner: (val('fxPartner') || '').trim(), biz: val('fxBiz'),
+  };
+  if (id) Object.assign(db.fixed.find(x => x.id === id), rec);
+  else db.fixed.push(rec);
+  save(); closeModal('fixedModal'); renderFixed();
+  showToast(id ? '更新しました' : '登録しました。来月から自動で記帳されます');
+}
+function deleteFixed() {
+  const id = val('fxId');
+  if (!confirm('これを削除しますか？（すでに記帳した分は残ります）')) return;
+  db.fixed = db.fixed.filter(x => x.id !== id);
+  save(); closeModal('fixedModal'); renderFixed(); showToast('削除しました');
+}
+
+function applyFixed(manual) {
+  const m = monthOf(today());
+  if (!db.fixedApplied[m]) db.fixedApplied[m] = [];
+  let n = 0;
+  db.fixed.forEach(f => {
+    if (db.fixedApplied[m].includes(f.id)) return;
+    const day = String(f.day).padStart(2, '0');
+    addJournal(buildExpense({
+      date: `${m}-${day}`, amount: f.amount, account: f.account, pay: f.pay, ratio: f.ratio,
+      partner: f.partner, desc: f.name, biz: f.biz, src: 'fixed',
+    }));
+    db.fixedApplied[m].push(f.id);
+    n++;
+  });
+  if (n) { save(); renderFixed(); renderMonthTbl(); }
+  if (manual) showToast(n ? `${n}件を今月分として計上しました` : '今月分はすでに計上済みです');
+  return n;
+}
+
+/* ══════════════════════════════════════════════════════════
+   帳簿
+   ══════════════════════════════════════════════════════════ */
+function renderBooks() {
+  const type = val('bookType');
+  document.getElementById('ledgerAccField').style.display = type === 'ledger' ? '' : 'none';
+  const kw = (val('bookSearch') || '').trim().toLowerCase();
+  const body = document.getElementById('bookBody');
+  let js = yearJournals(db.year);
+  if (kw) js = js.filter(j => (j.desc || '').toLowerCase().includes(kw) || (j.partner || '').toLowerCase().includes(kw));
+
+  if (type === 'journal') {
+    let dt = 0, ct = 0;
+    const rows = js.map(j => {
+      const D = j.lines.filter(l => l.side === 'D'), C = j.lines.filter(l => l.side === 'C');
+      D.forEach(l => dt += l.amt); C.forEach(l => ct += l.amt);
+      const n = Math.max(D.length, C.length);
+      let out = '';
+      for (let i = 0; i < n; i++) {
+        out += `<tr>
+          <td>${i === 0 ? esc(j.date) : ''}</td>
+          <td>${D[i] ? esc(D[i].ac) : ''}</td><td class="num">${D[i] ? yen(D[i].amt) : ''}</td>
+          <td>${C[i] ? esc(C[i].ac) : ''}</td><td class="num">${C[i] ? yen(C[i].amt) : ''}</td>
+          <td>${i === 0 ? esc(j.desc || '') + (j.partner ? ` <span class="muted">/ ${esc(j.partner)}</span>` : '') : ''}</td>
+        </tr>`;
+      }
+      return out;
+    }).join('');
+    body.innerHTML = `<h2 class="serif" style="font-size:16px;margin-bottom:12px">仕訳帳 <span class="muted" style="font-size:12.5px">${db.year}年 ／ ${js.length}件</span></h2>
+      <div class="tbl-scroll"><table>
+      <thead><tr><th>日付</th><th>借方科目</th><th class="num">借方金額</th><th>貸方科目</th><th class="num">貸方金額</th><th>摘要</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="6" class="empty">記帳がありません</td></tr>'}
+      <tr class="total"><td>合計</td><td></td><td class="num">${yen(dt)}</td><td></td><td class="num">${yen(ct)}</td><td></td></tr>
+      </tbody></table></div>`;
+
+  } else if (type === 'ledger') {
+    const acc = val('ledgerAcc');
+    const meta = AC[acc] || { s: 'D' };
+    let bal = 0;
+    const rows = js.filter(j => j.lines.some(l => l.ac === acc)).map(j => {
+      const line = j.lines.find(l => l.ac === acc);
+      const other = j.lines.filter(l => l.ac !== acc).map(l => l.ac).join('・') || '諸口';
+      const d = line.side === 'D' ? line.amt : 0, c = line.side === 'C' ? line.amt : 0;
+      bal += meta.s === 'D' ? d - c : c - d;
+      return `<tr><td>${esc(j.date)}</td><td>${esc(other)}</td><td>${esc(j.desc || '')}</td>
+        <td class="num">${d ? yen(d) : ''}</td><td class="num">${c ? yen(c) : ''}</td><td class="num">${yen(bal)}</td></tr>`;
+    }).join('');
+    body.innerHTML = `<h2 class="serif" style="font-size:16px;margin-bottom:12px">総勘定元帳 — ${esc(acc)} <span class="muted" style="font-size:12.5px">${db.year}年</span></h2>
+      <div class="tbl-scroll"><table>
+      <thead><tr><th>日付</th><th>相手科目</th><th>摘要</th><th class="num">借方</th><th class="num">貸方</th><th class="num">残高</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="6" class="empty">この科目の記帳はありません</td></tr>'}</tbody></table></div>`;
+
+  } else {
+    const b = balances(db.year);
+    let dt = 0, ct = 0, dbt = 0, cbt = 0;
+    const rows = ACCOUNTS.filter(a => b[a.n]).map(a => {
+      const x = b[a.n], bal = balanceOf(b, a.n);
+      dt += x.d; ct += x.c;
+      const dBal = a.s === 'D' ? bal : 0, cBal = a.s === 'C' ? bal : 0;
+      dbt += dBal; cbt += cBal;
+      return `<tr><td>${esc(a.n)}</td><td class="muted">${typeLabel(a.t)}</td>
+        <td class="num">${yen(x.d)}</td><td class="num">${yen(x.c)}</td>
+        <td class="num">${dBal ? yen(dBal) : ''}</td><td class="num">${cBal ? yen(cBal) : ''}</td></tr>`;
+    }).join('');
+    body.innerHTML = `<h2 class="serif" style="font-size:16px;margin-bottom:12px">合計残高試算表 <span class="muted" style="font-size:12.5px">${db.year}年</span></h2>
+      <div class="tbl-scroll"><table>
+      <thead><tr><th>勘定科目</th><th>区分</th><th class="num">借方合計</th><th class="num">貸方合計</th><th class="num">借方残高</th><th class="num">貸方残高</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="6" class="empty">記帳がありません</td></tr>'}
+      <tr class="total"><td>合計</td><td></td><td class="num">${yen(dt)}</td><td class="num">${yen(ct)}</td><td class="num">${yen(dbt)}</td><td class="num">${yen(cbt)}</td></tr>
+      </tbody></table></div>
+      ${Math.abs(dt - ct) > 1 ? `<div class="warn" style="margin-top:12px">借方合計と貸方合計が ${yen(Math.abs(dt - ct))} ずれています。</div>` : ''}`;
+  }
+}
+
+function exportCsv() {
+  const rows = [['日付', '借方科目', '借方金額', '貸方科目', '貸方金額', '摘要', '取引先', '事業']];
+  yearJournals(db.year).forEach(j => {
+    const D = j.lines.filter(l => l.side === 'D'), C = j.lines.filter(l => l.side === 'C');
+    const n = Math.max(D.length, C.length);
+    for (let i = 0; i < n; i++) {
+      rows.push([i === 0 ? j.date : '', D[i] ? D[i].ac : '', D[i] ? D[i].amt : '',
+        C[i] ? C[i].ac : '', C[i] ? C[i].amt : '', i === 0 ? (j.desc || '') : '',
+        i === 0 ? (j.partner || '') : '', i === 0 ? bizLabel(j.biz) : '']);
+    }
+  });
+  const csv = '﻿' + rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  downloadFile(`仕訳帳_${db.year}.csv`, csv, 'text/csv');
+}
+function downloadFile(name, content, type) {
+  const blob = content instanceof Blob ? content : new Blob([content], { type: type || 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ══════════════════════════════════════════════════════════
+   決算・申告
+   ══════════════════════════════════════════════════════════ */
+function renderClose() {
+  const pl = plData(db.year);
+  const bs = bsData(db.year);
+  document.getElementById('plYear').textContent = `${db.year}年1月1日〜12月31日`;
+  document.getElementById('bsYear').textContent = `${db.year}年12月31日現在`;
+
+  renderSteps(bs);
+
+  document.getElementById('plTbl').innerHTML =
+    `<tbody>
+      <tr class="sub"><td colspan="2">【 収入 】</td></tr>
+      ${pl.rev.map(([n, v]) => `<tr><td>${esc(n)}</td><td class="num">${yen(v)}</td></tr>`).join('') || '<tr><td colspan="2" class="empty">なし</td></tr>'}
+      <tr class="sub"><td>売上（収入）合計</td><td class="num">${yen(pl.revTotal)}</td></tr>
+      <tr class="sub"><td colspan="2">【 必要経費 】</td></tr>
+      ${pl.exp.map(([n, v]) => `<tr><td>${esc(n)}</td><td class="num">${yen(v)}</td></tr>`).join('') || '<tr><td colspan="2" class="empty">なし</td></tr>'}
+      <tr class="sub"><td>経費 合計</td><td class="num">${yen(pl.expTotal)}</td></tr>
+      <tr class="total"><td>差引金額（事業所得）</td><td class="num ${pl.profit >= 0 ? 'amt-pos' : 'amt-neg'}">${yen(pl.profit)}</td></tr>
+    </tbody>`;
+
+  document.getElementById('bsTbl').innerHTML =
+    `<thead><tr><th>資産の部</th><th class="num">金額</th><th>負債・資本の部</th><th class="num">金額</th></tr></thead><tbody>
+      ${bsRows(bs)}
+      <tr class="total"><td>資産合計</td><td class="num">${yen(bs.assetTotal)}</td><td>負債・資本合計</td><td class="num">${yen(bs.liabTotal + bs.capital)}</td></tr>
+    </tbody>`;
+  document.getElementById('bsCheck').innerHTML = Math.abs(bs.diff) > 1
+    ? `<div class="warn">左右が ${yen(Math.abs(bs.diff))} 合いません。年のはじめの残高を確認してください。
+       <button class="btn btn-sm no-print" onclick="openOpening()">入力する</button></div>`
+    : `<div class="info">✅ 貸借は一致しています。</div>`;
+
+  const ded = Number(db.profile.deduction || 650000);
+  const usedDed = Math.min(ded, Math.max(0, pl.profit));
+  const afterBlue = Math.max(0, pl.profit - ded);
+  const taxable = Math.max(0, afterBlue - 480000);
+  const it = incomeTax(taxable);
+  const jumin = Math.max(0, Math.floor(Math.max(0, afterBlue - 430000) * 0.10)) + 5000;
+  document.getElementById('taxTbl').innerHTML = `<tbody>
+    <tr><td>事業所得（売上 − 経費）</td><td class="num">${yen(pl.profit)}</td></tr>
+    <tr><td>青色申告特別控除</td><td class="num amt-neg">− ${yen(usedDed)}</td></tr>
+    <tr class="sub"><td>合計所得金額</td><td class="num">${yen(afterBlue)}</td></tr>
+    <tr><td>基礎控除</td><td class="num amt-neg">− ${yen(480000)}</td></tr>
+    <tr class="sub"><td>課税所得</td><td class="num">${yen(taxable)}</td></tr>
+    <tr><td>所得税＋復興特別所得税（目安）</td><td class="num">${yen(it)}</td></tr>
+    <tr><td>住民税（目安・所得割10%＋均等割5,000円）</td><td class="num">${yen(jumin)}</td></tr>
+    <tr class="total"><td>税額の合計目安</td><td class="num">${yen(it + jumin)}</td></tr>
+  </tbody>
+  <tfoot><tr><td colspan="2" class="muted" style="font-size:12px;border:0;padding-top:10px">
+    ※ 国民健康保険料・国民年金・生命保険料・小規模企業共済などの所得控除は含んでいません。実際の税額はこれより下がります。
+  </td></tr></tfoot>`;
+
+  renderAssets();
+}
+
+function renderSteps(bs) {
+  const hasRatio = Object.keys(db.ratios).length > 0;
+  const hasOpening = !!(db.opening[db.year] && Object.keys(db.opening[db.year]).length);
+  const hasAssets = db.assets.length > 0;
+  const depDone = hasAssets && db.assets.every(a =>
+    depreciationFor(a, db.year).amount === 0 ||
+    db.journals.some(j => j.src === 'depreciation' && j.assetId === a.id && (j.date||'').slice(0,4) === String(db.year)));
+  const steps = [
+    [1, hasRatio, '家事按分を決める', '自宅の家賃・電気代・携帯代のうち、事業で使う割合を科目ごとに決めます。', '割合を設定', 'openRatios()'],
+    [2, hasOpening, '年のはじめの残高を入れる', '1月1日時点の現金・預金・借入金などを入れます。貸借対照表がここで合います。', '残高を入力', 'openOpening()'],
+    [3, hasAssets, '10万円以上の買い物を登録する', 'パソコン・楽器・車などは何年かに分けて経費にします（減価償却）。', '資産を追加', 'openAsset()'],
+    [4, depDone, '減価償却費を記帳する', '登録した資産の今年ぶんの償却費を12月31日付で記帳します。', '記帳する', 'runDepreciation()'],
+  ];
+  document.getElementById('stepList').innerHTML = steps.map(([no, done, title, desc, btn, fn]) => `
+    <div class="step${done ? ' done' : ''}">
+      <div class="no">${done ? '✓' : no}</div>
+      <div class="body">
+        <h3>${title}</h3>
+        <p>${desc}</p>
+        <button class="btn btn-sm${done ? '' : ' btn-primary'}" onclick="${fn}">${btn}</button>
+      </div>
+    </div>`).join('');
+}
+
+function bsRows(bs) {
+  const L = bs.assets.map(([n, v]) => [esc(n), yen(v)]);
+  const R = bs.liab.map(([n, v]) => [esc(n), yen(v)]);
+  R.push(['元入金', yen(bs.motoire)]);
+  if (bs.nushiKari) R.push(['事業主借', yen(bs.nushiKari)]);
+  R.push(['青色申告特別控除前の所得金額', yen(bs.profit)]);
+  const n = Math.max(L.length, R.length);
+  let out = '';
+  for (let i = 0; i < n; i++) {
+    out += `<tr><td>${L[i] ? L[i][0] : ''}</td><td class="num">${L[i] ? L[i][1] : ''}</td>
+      <td>${R[i] ? R[i][0] : ''}</td><td class="num">${R[i] ? R[i][1] : ''}</td></tr>`;
+  }
+  return out;
+}
+
+/* ── 家事按分 ── */
+function openRatios() {
+  const shown = new Set([...KAJI_ACCS, ...Object.keys(db.ratios)]);
+  document.getElementById('ratioBody').innerHTML = EXPENSE_ACCS.map(n => {
+    const v = db.ratios[n];
+    return `<div class="field" style="display:${shown.has(n) ? 'block' : 'none'}" data-acc="${esc(n)}">
+      <label>${esc(n)} <span class="hint">${esc(ACC_HINT[n] || '')}</span></label>
+      <input type="number" min="0" max="100" data-ratio="${esc(n)}" value="${v == null ? 100 : v}">
+    </div>`;
+  }).join('') +
+  `<div class="field"><label>他の科目も按分する</label><select id="ratioAdd" onchange="addRatioRow(this.value)">
+    <option value="">選ぶ…</option>${EXPENSE_ACCS.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('')}
+  </select></div>`;
+  openModal('ratioModal');
+}
+function addRatioRow(n) {
+  if (!n) return;
+  const el = document.querySelector(`#ratioBody .field[data-acc="${n}"]`);
+  if (el) el.style.display = 'block';
+  document.getElementById('ratioAdd').value = '';
+}
+function saveRatios() {
+  document.querySelectorAll('#ratioBody input[data-ratio]').forEach(i => {
+    const acc = i.dataset.ratio, v = Number(i.value);
+    const visible = i.closest('.field').style.display !== 'none';
+    if (visible && v >= 0 && v < 100) db.ratios[acc] = v;
+    else delete db.ratios[acc];
+  });
+  save(); closeModal('ratioModal'); onAccountChange(); renderClose();
+  showToast('按分の割合を保存しました');
+}
+
+/* ── 期首残高 ── */
+const OPENING_ACCS = ['現金', '普通預金', '売掛金', '棚卸資産', '工具器具備品', '車両運搬具', '一括償却資産', '買掛金', '未払金', '借入金'];
+function openOpening() {
+  const y = db.year;
+  document.getElementById('opYear').textContent = y;
+  const cur = db.opening[y] || {};
+  document.getElementById('openingBody').innerHTML = `<div class="grid g2">` + OPENING_ACCS.map(n =>
+    `<div class="field"><label>${esc(n)} <span class="hint">${typeLabel(AC[n].t)}</span></label>
+      <input type="number" data-op="${esc(n)}" value="${cur[n] || ''}" placeholder="0"></div>`).join('') + `</div>`;
+  openModal('openingModal');
+}
+function saveOpening() {
+  const y = db.year;
+  const vals = {};
+  document.querySelectorAll('#openingBody input[data-op]').forEach(i => {
+    const v = Number(i.value) || 0;
+    if (v) vals[i.dataset.op] = v;
+  });
+  db.opening[y] = vals;
+  db.journals = db.journals.filter(j => !(j.src === 'opening' && (j.date || '').slice(0, 4) === String(y)));
+  const lines = [];
+  let dSum = 0, cSum = 0;
+  Object.entries(vals).forEach(([n, v]) => {
+    const side = AC[n].s;
+    lines.push({ ac: n, side, amt: v });
+    if (side === 'D') dSum += v; else cSum += v;
+  });
+  const motoire = dSum - cSum;
+  if (motoire !== 0) lines.push({ ac: '元入金', side: motoire > 0 ? 'C' : 'D', amt: Math.abs(motoire) });
+  if (lines.length) {
+    db.journals.push({ id: uid(), date: `${y}-01-01`, lines, desc: '前期繰越（年のはじめの残高）', partner: '', biz: 'common', src: 'opening' });
+  }
+  save(); closeModal('openingModal'); renderClose(); renderHome();
+  showToast(lines.length ? `登録しました（元入金 ${yen(Math.abs(motoire))}）` : '登録しました');
+}
+
+/* ── 減価償却 ── */
+function openAsset(id) {
+  const a = id ? db.assets.find(x => x.id === id) : null;
+  document.getElementById('assetTitle').textContent = a ? '資産を編集' : '減価償却の資産を登録';
+  document.getElementById('asId').value = a ? a.id : '';
+  document.getElementById('asName').value = a ? a.name : '';
+  document.getElementById('asCost').value = a ? a.cost : '';
+  document.getElementById('asDate').value = a ? a.date : today();
+  document.getElementById('asMethod').value = a ? a.method : 'teigaku';
+  document.getElementById('asRatio').value = a ? a.ratio : 100;
+  fillSelect(document.getElementById('asLife'), LIFE_OPTIONS, a ? a.life : 4);
+  fillSelect(document.getElementById('asAccount'), ['工具器具備品', '車両運搬具', '一括償却資産'], a ? a.account : '工具器具備品');
+  fillSelect(document.getElementById('asBiz'), bizOptions(), a ? a.biz : 'common');
+  document.getElementById('asDelBtn').style.display = a ? '' : 'none';
+  onAssetMethod();
+  openModal('assetModal');
+}
+function onAssetMethod() {
+  document.getElementById('asLifeField').style.display = val('asMethod') === 'teigaku' ? '' : 'none';
+}
+function saveAsset() {
+  const id = val('asId');
+  const name = (val('asName') || '').trim();
+  const cost = Number(val('asCost')) || 0;
+  if (!name || !cost) return showToast('名前と金額を入れてください');
+  const rec = {
+    id: id || uid(), name, cost, date: val('asDate'), method: val('asMethod'),
+    life: Number(val('asLife')) || 4,
+    ratio: Math.min(100, Math.max(0, Number(val('asRatio')) || 100)),
+    account: val('asAccount'), biz: val('asBiz'),
+  };
+  if (id) Object.assign(db.assets.find(x => x.id === id), rec); else db.assets.push(rec);
+  save(); closeModal('assetModal'); renderClose(); showToast('保存しました');
+}
+function deleteAsset() {
+  const id = val('asId');
+  if (!confirm('この資産を削除しますか？')) return;
+  db.assets = db.assets.filter(x => x.id !== id);
+  save(); closeModal('assetModal'); renderClose();
+}
+
+function depreciationFor(a, y) {
+  const acqY = Number((a.date || '').slice(0, 4));
+  const acqM = Number((a.date || '').slice(5, 7)) || 1;
+  if (!acqY || y < acqY) return { amount: 0, note: '取得前' };
+  const r = (a.ratio || 100) / 100;
+  if (a.method === 'shogaku') {
+    return y === acqY ? { amount: Math.round(a.cost * r), note: '少額の特例（その年に全額）' }
+                      : { amount: 0, note: '償却済み' };
+  }
+  if (a.method === 'ikkatsu') {
+    const n = y - acqY;
+    if (n > 2) return { amount: 0, note: '償却済み（3年経過）' };
+    return { amount: Math.round(a.cost / 3 * r), note: `一括償却 ${n + 1}/3年目` };
+  }
+  const rate = TEIGAKU_RATE[a.life] || Math.ceil(1000 / a.life) / 1000;
+  const months = (y === acqY) ? (13 - acqM) : 12;
+  let amt = Math.round(a.cost * rate * months / 12 * r);
+  const prior = accumulatedBefore(a, y);
+  const limit = Math.round((a.cost - 1) * r) - prior;
+  if (limit <= 0) return { amount: 0, note: '償却済み' };
+  amt = Math.min(amt, limit);
+  return { amount: amt, note: `定額法 ${a.life}年（率 ${rate}）${months < 12 ? ` ／ ${months}ヶ月` : ''}` };
+}
+function accumulatedBefore(a, y) {
+  let sum = 0;
+  const acqY = Number((a.date || '').slice(0, 4));
+  const rate = TEIGAKU_RATE[a.life] || Math.ceil(1000 / a.life) / 1000;
+  for (let yy = acqY; yy < y; yy++) {
+    const months = (yy === acqY) ? (13 - Number((a.date || '').slice(5, 7) || 1)) : 12;
+    sum += Math.round(a.cost * rate * months / 12 * ((a.ratio || 100) / 100));
+  }
+  return sum;
+}
+
+function renderAssets() {
+  const y = db.year;
+  let total = 0;
+  const rows = db.assets.map(a => {
+    const d = depreciationFor(a, y);
+    total += d.amount;
+    const done = db.journals.some(j => j.src === 'depreciation' && j.assetId === a.id && (j.date || '').slice(0, 4) === String(y));
+    return `<tr>
+      <td><b>${esc(a.name)}</b><br><span class="muted" style="font-size:11.5px">${esc(a.date)} から使用${a.ratio < 100 ? ` ／ 事業割合 ${a.ratio}%` : ''}</span></td>
+      <td class="num">${yen(a.cost)}</td>
+      <td class="muted">${esc(d.note)}</td>
+      <td class="num">${yen(d.amount)}</td>
+      <td>${done ? '<span class="pill" style="color:#006300;border-color:#b6dfc0">記帳済</span>' : '<span class="muted">未記帳</span>'}</td>
+      <td class="no-print"><button class="btn btn-sm" onclick="openAsset('${a.id}')">編集</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('assetTbl').innerHTML =
+    `<thead><tr><th>資産</th><th class="num">買った金額</th><th>償却のしかた</th><th class="num">${y}年の経費</th><th>状態</th><th class="no-print"></th></tr></thead>
+     <tbody>${rows || '<tr><td colspan="6" class="empty">パソコン・楽器・車などを登録すると、その年に経費にできる金額を自動で計算します</td></tr>'}
+     ${db.assets.length ? `<tr class="total"><td colspan="3">${y}年 減価償却費 合計</td><td class="num">${yen(total)}</td><td colspan="2"></td></tr>` : ''}
+     </tbody>`;
+}
+
+function runDepreciation() {
+  const y = db.year;
+  if (!db.assets.length) return showToast('先に資産を登録してください');
+  let n = 0, sum = 0;
+  db.assets.forEach(a => {
+    if (db.journals.some(j => j.src === 'depreciation' && j.assetId === a.id && (j.date || '').slice(0, 4) === String(y))) return;
+    const d = depreciationFor(a, y);
+    if (!d.amount) return;
+    db.journals.push({
+      id: uid(), date: `${y}-12-31`, assetId: a.id, src: 'depreciation',
+      lines: [{ ac: '減価償却費', side: 'D', amt: d.amount }, { ac: a.account, side: 'C', amt: d.amount }],
+      desc: `減価償却費 ${a.name}（${d.note}）`, partner: '', biz: a.biz || 'common',
+    });
+    n++; sum += d.amount;
+  });
+  if (!n) return showToast('計上する償却費はありません（すでに記帳済みです）');
+  save(); renderClose(); renderHome();
+  showToast(`${n}件・合計 ${yen(sum)} を記帳しました`);
+}
+
+/* ══════════════════════════════════════════════════════════
+   設定・同期・バックアップ
+   ══════════════════════════════════════════════════════════ */
+function renderSettings() {
+  const nowY = new Date().getFullYear();
+  const years = [];
+  for (let y = nowY + 1; y >= nowY - 6; y--) years.push(y);
+  fillSelect(document.getElementById('setYear'), years, db.year);
+  document.getElementById('setName').value = db.profile.name || '';
+  document.getElementById('setDeduction').value = db.profile.deduction || 650000;
+  document.getElementById('setApiKey').value = db.api.key || '';
+  document.getElementById('setModel').value = db.api.model || 'claude-haiku-4-5';
+  document.getElementById('ghUser').value = db.gh.user || '';
+  document.getElementById('ghRepo').value = db.gh.repo || '';
+  document.getElementById('ghBranch').value = db.gh.branch || 'main';
+  document.getElementById('ghToken').value = db.gh.token || '';
+  document.getElementById('hdrYear').textContent = db.year;
+}
+function saveSettings() {
+  db.profile.name = (val('setName') || '').trim();
+  db.profile.deduction = Number(val('setDeduction'));
+  save(); renderSettings(); showToast('保存しました');
+}
+function changeYear() {
+  db.year = Number(val('setYear'));
+  save(); renderSettings(); showToast(db.year + '年分に切り替えました');
+}
+function saveApi() {
+  db.api.key = (val('setApiKey') || '').trim();
+  db.api.model = val('setModel');
+  save(); renderApiWarn(); showToast('保存しました');
+}
+async function testApi() {
+  const el = document.getElementById('apiTestResult');
+  const key = (val('setApiKey') || '').trim();
+  if (!key) { el.innerHTML = '<div class="warn">APIキーを入れてください</div>'; return; }
+  el.innerHTML = '<div class="info"><span class="spinner"></span> 接続中…</div>';
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': key,
+        'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: val('setModel'), max_tokens: 16, messages: [{ role: 'user', content: 'ping' }] }),
+    });
+    const t = await res.text();
+    el.innerHTML = res.ok
+      ? '<div class="info">✅ つながりました。レシートの自動読み取りが使えます。</div>'
+      : `<div class="warn">❌ エラー ${res.status}<br><span style="font-size:12px">${esc(t.slice(0, 300))}</span></div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="warn">❌ 通信に失敗しました：${esc(e.message)}<br>
+      <span style="font-size:12px">ファイルを file:// で直接開いていると、ブラウザがブロックすることがあります。GitHub Pages などの https で開くと解決します。</span></div>`;
+  }
+}
+function saveGh() {
+  db.gh = { user: (val('ghUser') || '').trim(), repo: (val('ghRepo') || '').trim(),
+            branch: (val('ghBranch') || '').trim() || 'main', token: (val('ghToken') || '').trim() };
+  save(); renderSettings(); showToast('保存しました');
+}
+
+/* ── GitHub API ── */
+function ghHeaders() {
+  return { Authorization: `token ${db.gh.token}`, Accept: 'application/vnd.github+json', 'content-type': 'application/json' };
+}
+async function ghGetFile(path) {
+  const res = await fetch(`https://api.github.com/repos/${db.gh.user}/${db.gh.repo}/contents/${path}?ref=${encodeURIComponent(db.gh.branch)}`,
+    { headers: ghHeaders() });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`GitHub ${res.status}: ${(await res.text()).slice(0, 160)}`);
+  return res.json();
+}
+async function ghPutFile(path, base64, msg) {
+  const existing = await ghGetFile(path);
+  const res = await fetch(`https://api.github.com/repos/${db.gh.user}/${db.gh.repo}/contents/${path}`, {
+    method: 'PUT', headers: ghHeaders(),
+    body: JSON.stringify({ message: msg || `update ${path}`, content: base64.replace(/\n/g, ''),
+      branch: db.gh.branch, sha: existing ? existing.sha : undefined }),
+  });
+  if (!res.ok) throw new Error(`GitHub ${res.status}: ${(await res.text()).slice(0, 160)}`);
+  return res.json();
+}
+function toB64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function fromB64(b64) {
+  const bin = atob(b64.replace(/\n/g, ''));
+  return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+function ghReady() {
+  if (!db.gh.token || !db.gh.user || !db.gh.repo) { showToast('先にGitHubの設定を保存してください'); return false; }
+  return true;
+}
+async function syncPush() {
+  if (!ghReady()) return;
+  const el = document.getElementById('ghResult');
+  el.innerHTML = '<div class="info"><span class="spinner"></span> 送信中…</div>';
+  try {
+    let imgN = 0;
+    for (const r of db.receipts) {
+      if (r.img && !r.imgPath) {
+        await ghPutFile(`receipts/${r.id}.jpg`, r.img.split(',')[1], `receipt ${r.date}`);
+        imgCache[r.id] = r.img;
+        r.imgPath = `receipts/${r.id}.jpg`; r.img = null; imgN++;
+      }
+    }
+    const payload = Object.assign({}, db);
+    delete payload.api; delete payload.gh;   /* 鍵はサーバーに置かない */
+    payload.receipts = payload.receipts.map(r => Object.assign({}, r, { img: null }));
+    await ghPutFile('kaikei.json', toB64(JSON.stringify(payload, null, 2)), `帳簿更新 ${new Date().toLocaleString('ja-JP')}`);
+    save();
+    el.innerHTML = `<div class="info">✅ 送りました（画像 ${imgN} 枚を含む）。ほかの端末で「↓ 取り込む」を押すと反映されます。</div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="warn">❌ ${esc(e.message)}</div>`;
+  }
+}
+async function syncPull() {
+  if (!ghReady()) return;
+  const el = document.getElementById('ghResult');
+  el.innerHTML = '<div class="info"><span class="spinner"></span> 取得中…</div>';
+  try {
+    const f = await ghGetFile('kaikei.json');
+    if (!f) { el.innerHTML = '<div class="warn">サーバーにデータがありません。先に「↑ 送る」を押してください。</div>'; return; }
+    const remote = JSON.parse(fromB64(f.content));
+    const localTime = new Date(db.updatedAt || 0).getTime();
+    const remoteTime = new Date(remote.updatedAt || 0).getTime();
+    const msg = remoteTime < localTime
+      ? `サーバーのデータ（${new Date(remoteTime).toLocaleString('ja-JP')}）は、この端末（${new Date(localTime).toLocaleString('ja-JP')}）より古いです。\nそれでも取り込んで、この端末のデータを上書きしますか？`
+      : `サーバーのデータ（${new Date(remoteTime).toLocaleString('ja-JP')}）でこの端末を上書きします。よろしいですか？`;
+    if (!confirm(msg)) { el.innerHTML = '<div class="info">取り込みを中止しました。</div>'; return; }
+    const keepApi = db.api, keepGh = db.gh;
+    db = Object.assign(blank(), remote, { api: keepApi, gh: keepGh });
+    save(); imgCache = {};
+    renderAll();
+    el.innerHTML = `<div class="info">✅ 取り込みました（記帳 ${db.journals.length} 件 ／ レシート ${db.receipts.length} 枚）。</div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="warn">❌ ${esc(e.message)}</div>`;
+  }
+}
+
+function exportJson() {
+  const payload = Object.assign({}, db);
+  delete payload.api; delete payload.gh;
+  downloadFile(`確定申告_${db.year}_${today()}.json`, JSON.stringify(payload, null, 2), 'application/json');
+}
+function importJsonFile(file) {
+  if (!file) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const d = JSON.parse(fr.result);
+      if (!confirm('この端末のデータをファイルの内容で上書きします。よろしいですか？')) return;
+      const keepApi = db.api, keepGh = db.gh;
+      db = Object.assign(blank(), d, { api: keepApi, gh: keepGh });
+      save(); renderAll(); showToast('読み込みました');
+    } catch (e) { alert('ファイルを読み込めませんでした：' + e.message); }
+  };
+  fr.readAsText(file);
+  document.getElementById('importJson').value = '';
+}
+
+function importKeihi() {
+  const el = document.getElementById('importResult');
+  let recs;
+  try { recs = JSON.parse(localStorage.getItem(KEIHI_KEY) || '[]'); } catch (e) { recs = []; }
+  if (!Array.isArray(recs) || !recs.length) {
+    el.innerHTML = `<div class="warn">経費管理アプリのデータが見つかりませんでした。<br>
+      <span style="font-size:12px">同じ場所（同じオリジン）で keihi_manager.html を開いたことがある場合のみ読めます。file:// で別フォルダから開いていると読めません。</span></div>`;
+    return;
+  }
+  const already = new Set(db.journals.filter(j => j.src === 'keihi').map(j => j.keihiId));
+  let n = 0;
+  recs.forEach(r => {
+    if (already.has(r.id)) return;
+    const amt = Number(r.amount) || 0;
+    if (!amt || !r.date) return;
+    const isIncome = r.type === 'income';
+    const acc = isIncome ? '売上高' : (EXPENSE_ACCS.includes(r.category) ? r.category : '雑費');
+    const j = isIncome
+      ? buildRevenue({ date: ymd(r.date), amount: amt, account: acc, recv: '普通預金', partner: '', desc: r.description || '', biz: r.business || 'common' })
+      : buildExpense({ date: ymd(r.date), amount: amt, account: acc, pay: '事業主借', ratio: 100, partner: '', desc: r.description || '', biz: r.business || 'common' });
+    j.src = 'keihi'; j.keihiId = r.id;
+    db.journals.push(j);
+    n++;
+  });
+  save(); renderAll();
+  el.innerHTML = `<div class="info">✅ ${n} 件を取り込みました${n ? '（支払方法は「事業主借」で仮置きしています。必要なら帳簿で直してください）' : ''}。</div>`;
+}
+
+function wipe() {
+  if (!confirm('この端末の帳簿データをすべて削除します。元に戻せません。よろしいですか？')) return;
+  if (!confirm('本当に削除しますか？先にJSONを書き出しておくことを強くおすすめします。')) return;
+  const keepApi = db.api, keepGh = db.gh;
+  db = blank(); db.api = keepApi; db.gh = keepGh;
+  save(); renderAll(); showToast('削除しました');
+}
+
+/* ══════════════════════════════════════════════════════════
+   初期化
+   ══════════════════════════════════════════════════════════ */
+function renderAll() {
+  renderSettings();
+  refreshPartnerList();
+  fillSelect(document.getElementById('inBiz'), bizOptions(), 'common');
+  fillSelect(document.getElementById('jBiz'), bizOptions(), 'common');
+  fillSelect(document.getElementById('jDebit'), ACCOUNTS.map(a => a.n), '消耗品費');
+  fillSelect(document.getElementById('jCredit'), ACCOUNTS.map(a => a.n), '事業主借');
+  fillSelect(document.getElementById('ledgerAcc'), ACCOUNTS.map(a => a.n), '普通預金');
+  setMode(mode);
+  renderHome();
+  renderMonthTbl();
+  renderFixed();
+  renderReceipts();
+  renderApiWarn();
+}
+
+function init() {
+  load();
+  document.getElementById('inDate').value = today();
+  document.getElementById('jDate').value = today();
+  renderAll();
+
+  const n = applyFixed(false);
+  if (n) setTimeout(() => showToast(`毎月かかるもの ${n}件を今月分として自動記帳しました`), 800);
+
+  ['inAmount', 'inDate', 'inRatio'].forEach(id => document.getElementById(id).addEventListener('input', refreshPreview));
+  document.getElementById('inAccount').addEventListener('change', onAccountChange);
+  document.getElementById('inPay').addEventListener('change', refreshPreview);
+  document.getElementById('inPartner').addEventListener('change', onPartnerChange);
+
+  document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }));
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show')); });
+}
+init();
+</script>
+</body>
+</html>
