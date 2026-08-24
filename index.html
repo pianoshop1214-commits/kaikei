@@ -259,6 +259,7 @@
     <h1>確定申告</h1>
   </div>
   <div class="year-badge">
+    <span id="syncState" style="font-size:11.5px"></span>
     <span><b id="hdrYear">—</b> 年分</span>
     <button class="icon-btn" onclick="switchTab('settings')" title="設定">⚙</button>
   </div>
@@ -778,6 +779,25 @@ function save() {
   } catch (e) {
     alert('保存できませんでした。ブラウザの保存容量がいっぱいの可能性があります。\n設定 → 携帯とPCでデータを共有 で画像をサーバーに逃がすか、JSONを書き出してください。');
   }
+  autoSync();
+}
+
+/* ── 自動同期 ──────────────────────────────────────────
+   記帳するたびに裏でサーバーへ送る。押し忘れで端末間がズレるのを防ぐ。
+   suppressSync は「同期処理そのものが呼ぶ save()」で再帰しないための札。  */
+let syncTimer = null, syncing = false, suppressSync = false;
+function autoSync() {
+  if (suppressSync) return;
+  if (!db.gh || !db.gh.token || !db.gh.user || !db.gh.repo) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => { pushAll(true); }, 2500);
+}
+function setSyncState(kind, text) {
+  const el = document.getElementById('syncState');
+  if (!el) return;
+  const color = { sending:'var(--ink-3)', done:'var(--good-text)', error:'var(--bad-text)' }[kind] || 'var(--ink-3)';
+  el.style.color = color;
+  el.innerHTML = text;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -933,8 +953,26 @@ function renderHome() {
   renderRecent();
 }
 
+/* 起動時にサーバー側が新しくないか見る（勝手に上書きはせず、案内だけ出す） */
+let remoteNewer = null;
+async function checkRemote() {
+  if (!db.gh || !db.gh.token || !db.gh.user || !db.gh.repo) return;
+  try {
+    const f = await ghGetFile('kaikei.json');
+    if (!f) return;
+    const remote = JSON.parse(fromB64(f.content));
+    const rt = new Date(remote.updatedAt || 0).getTime();
+    const lt = new Date(db.updatedAt || 0).getTime();
+    if (rt > lt + 2000) { remoteNewer = rt; renderTodos(); setSyncState('error', '⚠ 新しいデータあり'); }
+    else setSyncState('done', '✓ 同期済');
+  } catch (e) { setSyncState('error', '⚠ 同期できていません'); }
+}
+
 function renderTodos() {
   const items = [];
+  if (remoteNewer) items.push(['☁️',
+    `ほかの端末で入力された新しいデータがサーバーにあります（${new Date(remoteNewer).toLocaleString('ja-JP')}）`,
+    null, '取り込む', "switchTab('settings'); setTimeout(syncPull, 150)"]);
   const unconf = db.receipts.filter(r => !r.journalId).length;
   if (unconf) items.push(['📷', `未記帳のレシートが <b>${unconf}枚</b> あります`, 'trade', '確認する']);
   const bs = bsData(db.year);
@@ -1352,16 +1390,9 @@ async function confirmReceipt() {
   showToast('記帳しました');
   renderReceipts(); renderMonthTbl(); refreshPartnerList();
 
-  /* GitHub 設定済みなら画像を退避して端末の容量を空ける */
-  if (db.gh.token && db.gh.repo && rec.img && !rec.imgPath) {
-    try {
-      await ghPutFile(`receipts/${rec.id}.jpg`, rec.img.split(',')[1], `receipt ${rec.date} ${rec.partner}`);
-      imgCache[rec.id] = rec.img;
-      rec.imgPath = `receipts/${rec.id}.jpg`;
-      rec.img = null;
-      save(); renderReceipts();
-    } catch (e) { console.warn('画像アップロード失敗', e); }
-  }
+  /* 画像も帳簿も autoSync（save 経由）がまとめて送る。
+     以前はここで画像だけ先に上げていたため、サーバーに写真だけあって
+     記録がない状態が起きていた。 */
 }
 
 function deleteReceipt() {
@@ -1979,10 +2010,19 @@ function ghReady() {
   }
   return true;
 }
-async function syncPush() {
+function syncPush() {
   if (!ghReady()) return;
+  document.getElementById('ghResult').innerHTML = '<div class="info"><span class="spinner"></span> 送信中…</div>';
+  pushAll(false);
+}
+
+/* 画像と帳簿をまとめて送る。silent=true は自動同期（画面を邪魔しない） */
+async function pushAll(silent) {
+  if (!db.gh.token || !db.gh.user || !db.gh.repo) return;
+  if (syncing) { autoSync(); return; }   /* 送信中に変更があったら送信後にもう一度 */
+  syncing = true;
   const el = document.getElementById('ghResult');
-  el.innerHTML = '<div class="info"><span class="spinner"></span> 送信中…</div>';
+  setSyncState('sending', '<span class="spinner"></span> 同期中');
   try {
     let imgN = 0;
     for (const r of db.receipts) {
@@ -1996,10 +2036,16 @@ async function syncPush() {
     delete payload.api; delete payload.gh;   /* 鍵はサーバーに置かない */
     payload.receipts = payload.receipts.map(r => Object.assign({}, r, { img: null }));
     await ghPutFile('kaikei.json', toB64(JSON.stringify(payload, null, 2)), `帳簿更新 ${new Date().toLocaleString('ja-JP')}`);
-    save();
-    el.innerHTML = `<div class="info">✅ 送りました（画像 ${imgN} 枚を含む）。ほかの端末で「↓ 取り込む」を押すと反映されます。</div>`;
+    suppressSync = true; save(); suppressSync = false;
+    setSyncState('done', `✓ ${new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'})} 同期済`);
+    if (!silent && el) el.innerHTML = `<div class="info">✅ 送りました（画像 ${imgN} 枚を含む）。ほかの端末で「↓ 取り込む」を押すと反映されます。</div>`;
+    if (silent) renderReceipts();
   } catch (e) {
-    el.innerHTML = `<div class="warn">❌ ${esc(e.message)}</div>`;
+    setSyncState('error', '⚠ 同期できていません');
+    if (!silent && el) el.innerHTML = `<div class="warn">❌ ${esc(e.message)}</div>`;
+    else showToast('同期に失敗しました。設定を確認してください');
+  } finally {
+    syncing = false;
   }
 }
 async function syncPull() {
@@ -2018,8 +2064,10 @@ async function syncPull() {
     if (!confirm(msg)) { el.innerHTML = '<div class="info">取り込みを中止しました。</div>'; return; }
     const keepApi = db.api, keepGh = db.gh;
     db = Object.assign(blank(), remote, { api: keepApi, gh: keepGh });
-    save(); imgCache = {};
+    suppressSync = true; save(); suppressSync = false;   /* 取り込んだ直後に送り返さない */
+    imgCache = {};
     renderAll();
+    setSyncState('done', `✓ ${new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'})} 取込済`);
     el.innerHTML = `<div class="info">✅ 取り込みました（記帳 ${db.journals.length} 件 ／ レシート ${db.receipts.length} 枚）。</div>`;
   } catch (e) {
     el.innerHTML = `<div class="warn">❌ ${esc(e.message)}</div>`;
@@ -2110,6 +2158,10 @@ function init() {
 
   const n = applyFixed(false);
   if (n) setTimeout(() => showToast(`毎月かかるもの ${n}件を今月分として自動記帳しました`), 800);
+
+  checkRemote();
+  /* 未送信のものが残っていれば起動時に送る（前回アプリを閉じた等） */
+  if (db.gh.token && db.receipts.some(r => r.img && !r.imgPath)) setTimeout(() => pushAll(true), 3000);
 
   ['inAmount', 'inDate', 'inRatio'].forEach(id => document.getElementById(id).addEventListener('input', refreshPreview));
   document.getElementById('inAccount').addEventListener('change', onAccountChange);
