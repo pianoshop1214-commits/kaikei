@@ -1880,8 +1880,9 @@ function renderSettings() {
   document.getElementById('setDeduction').value = db.profile.deduction || 650000;
   document.getElementById('setApiKey').value = db.api.key || '';
   document.getElementById('setModel').value = db.api.model || 'claude-haiku-4-5';
-  document.getElementById('ghUser').value = db.gh.user || '';
-  document.getElementById('ghRepo').value = db.gh.repo || '';
+  /* 作成済みのリポジトリを初期値として入れておく（打ち間違い防止） */
+  document.getElementById('ghUser').value = db.gh.user || 'pianoshop1214-commits';
+  document.getElementById('ghRepo').value = db.gh.repo || 'kaikei-data';
   document.getElementById('ghBranch').value = db.gh.branch || 'main';
   document.getElementById('ghToken').value = db.gh.token || '';
   document.getElementById('hdrYear').textContent = db.year;
@@ -1921,10 +1922,11 @@ async function testApi() {
       <span style="font-size:12px">ファイルを file:// で直接開いていると、ブラウザがブロックすることがあります。GitHub Pages などの https で開くと解決します。</span></div>`;
   }
 }
-function saveGh() {
+function saveGh(silent) {
   db.gh = { user: (val('ghUser') || '').trim(), repo: (val('ghRepo') || '').trim(),
             branch: (val('ghBranch') || '').trim() || 'main', token: (val('ghToken') || '').trim() };
-  save(); renderSettings(); showToast('保存しました');
+  save();
+  if (!silent) { renderSettings(); showToast('保存しました'); }
 }
 
 /* ── GitHub API ── */
@@ -1959,7 +1961,22 @@ function fromB64(b64) {
   return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
 }
 function ghReady() {
-  if (!db.gh.token || !db.gh.user || !db.gh.repo) { showToast('先にGitHubの設定を保存してください'); return false; }
+  /* 「保存」を押し忘れても動くように、送信前にフォームの内容を取り込む */
+  saveGh(true);
+  const miss = [];
+  if (!db.gh.user)  miss.push('ユーザー名');
+  if (!db.gh.repo)  miss.push('リポジトリ名');
+  if (!db.gh.token) miss.push('トークン');
+  if (miss.length) {
+    document.getElementById('ghResult').innerHTML =
+      `<div class="warn"><b>${miss.join('・')}</b> が空です。<br>
+       トークンは GitHub の
+       <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">この画面</a>
+       で作れます（Repository access で <b>kaikei-data</b> を選び、Permissions → Contents を
+       <b>Read and write</b> にするだけ）。できた <code>github_pat_…</code> を上の欄に貼ってください。</div>`;
+    showToast(`${miss.join('・')}が空です`);
+    return false;
+  }
   return true;
 }
 async function syncPush() {
