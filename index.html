@@ -959,12 +959,18 @@ async function checkRemote() {
   if (!db.gh || !db.gh.token || !db.gh.user || !db.gh.repo) return;
   try {
     const f = await ghGetFile('kaikei.json');
-    if (!f) return;
-    const remote = JSON.parse(fromB64(f.content));
-    const rt = new Date(remote.updatedAt || 0).getTime();
+    const remote = f ? JSON.parse(fromB64(f.content)) : null;
+    const rt = remote ? new Date(remote.updatedAt || 0).getTime() : 0;
     const lt = new Date(db.updatedAt || 0).getTime();
-    if (rt > lt + 2000) { remoteNewer = rt; renderTodos(); setSyncState('error', '⚠ 新しいデータあり'); }
-    else setSyncState('done', '✓ 同期済');
+    if (rt > lt + 2000) {
+      /* サーバーが新しい → 勝手に上書きせず案内だけ出す */
+      remoteNewer = rt; renderTodos(); setSyncState('error', '⚠ 新しいデータあり');
+    } else if (lt > rt + 2000) {
+      /* この端末が新しい → 未送信ぶんを起動時に送る */
+      pushAll(true);
+    } else {
+      setSyncState('done', '✓ 同期済');
+    }
   } catch (e) { setSyncState('error', '⚠ 同期できていません'); }
 }
 
@@ -2159,9 +2165,9 @@ function init() {
   const n = applyFixed(false);
   if (n) setTimeout(() => showToast(`毎月かかるもの ${n}件を今月分として自動記帳しました`), 800);
 
+  /* 起動時にサーバーと突き合わせる。
+     この端末が新しければ送り、サーバーが新しければ案内を出す。 */
   checkRemote();
-  /* 未送信のものが残っていれば起動時に送る（前回アプリを閉じた等） */
-  if (db.gh.token && db.receipts.some(r => r.img && !r.imgPath)) setTimeout(() => pushAll(true), 3000);
 
   ['inAmount', 'inDate', 'inRatio'].forEach(id => document.getElementById(id).addEventListener('input', refreshPreview));
   document.getElementById('inAccount').addEventListener('change', onAccountChange);
