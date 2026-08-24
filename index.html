@@ -1977,14 +1977,27 @@ async function ghGetFile(path) {
   if (!res.ok) throw new Error(`GitHub ${res.status}: ${(await res.text()).slice(0, 160)}`);
   return res.json();
 }
-async function ghPutFile(path, base64, msg) {
+/* GitHub は「更新前のファイルの目印(sha)」を要求する。
+   PCと携帯を同時に開いていると、先に片方が更新して目印が古くなり 409 になる。
+   その場合は目印を取り直して1回だけやり直す。                                */
+async function ghPutFile(path, base64, msg, retry) {
   const existing = await ghGetFile(path);
   const res = await fetch(`https://api.github.com/repos/${db.gh.user}/${db.gh.repo}/contents/${path}`, {
     method: 'PUT', headers: ghHeaders(),
     body: JSON.stringify({ message: msg || `update ${path}`, content: base64.replace(/\n/g, ''),
       branch: db.gh.branch, sha: existing ? existing.sha : undefined }),
   });
-  if (!res.ok) throw new Error(`GitHub ${res.status}: ${(await res.text()).slice(0, 160)}`);
+  if (res.status === 409 && !retry) {
+    await new Promise(r => setTimeout(r, 900));
+    return ghPutFile(path, base64, msg, true);
+  }
+  if (!res.ok) {
+    const body = (await res.text()).slice(0, 200);
+    if (res.status === 409) throw new Error('ほかの端末が同時に更新しました。少し待ってもう一度お試しください。');
+    if (res.status === 401 || res.status === 403) throw new Error('トークンが無効か、権限が足りません（Contents: Read and write を確認してください）。');
+    if (res.status === 404) throw new Error('リポジトリが見つかりません。ユーザー名・リポジトリ名を確認してください。');
+    throw new Error(`GitHub ${res.status}: ${body}`);
+  }
   return res.json();
 }
 function toB64(str) {
